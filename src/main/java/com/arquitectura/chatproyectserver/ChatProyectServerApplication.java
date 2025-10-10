@@ -8,6 +8,11 @@ public class ChatProyectServerApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ChatProyectServerApplication.class, args);
+        hola();
+    }
+
+    public static void hola() {
+    	System.out.println("Hola mundo");
     }
 
 }
