@@ -21,6 +21,7 @@
         <module>server-controladorTransporte</module>
         <module>server-controladorVista</module>
         <module>server-vista</module>
+        <module>server-app</module>
     </modules>
 
     <properties>
@@ -33,14 +34,32 @@
         <dependencies>
             <dependency>
                 <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
+                <artifactId>spring-framework-bom</artifactId>
                 <version>${spring.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-jpa</artifactId>
-                <version>3.1.2</version>
+                <artifactId>spring-data-bom</artifactId>
+                <version>2025.0.4</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
+            <!-- Jakarta Persistence -->
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+
+            <!-- Hibernate -->
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>6.2.7.Final</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

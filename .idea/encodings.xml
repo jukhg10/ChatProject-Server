@@ -7,6 +7,7 @@
     <file url="file://$PROJECT_DIR$/server-LogicaMensajes/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-Transporte/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-Transporte/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server-app/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-controladorTransporte/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-controladorTransporte/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-controladorVista/src/main/java" charset="UTF-8" />
@@ -23,7 +24,5 @@
     <file url="file://$PROJECT_DIR$/server-persistencia/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-vista/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-vista/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>
 </project>
