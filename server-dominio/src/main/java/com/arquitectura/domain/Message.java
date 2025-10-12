@@ -11,7 +11,8 @@ public abstract class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Column(name = "id_mensaje")
+    private Long idMensaje;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -48,8 +49,8 @@ public abstract class Message {
     }
     
     // ... otros getters y setters no cambian ...
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public Long getIdMensaje() { return idMensaje; }
+    public void setIdMensaje(Long id) { this.idMensaje = id; }
     public User getAuthor() { return author; }
     public void setAuthor(User author) { this.author = author; }
     public LocalDateTime getTimestamp() { return timestamp; }

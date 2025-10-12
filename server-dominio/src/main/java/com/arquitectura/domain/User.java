@@ -13,7 +13,8 @@ public class User {
 
     @Id // 3. Marca este campo como la clave primaria (primary key).
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 4. Le dice a la BD que genere el ID automáticamente.
-    private int id;
+    @Column(name = "user_id")
+    private int userId;
 
     @Column(nullable = false, unique = true) // 5. Campo no nulo y único.
     private String username;
@@ -24,6 +25,10 @@ public class User {
     @Column(nullable = false)
     private String hashedPassword;
 
+    @Column(name = "photo_address")
+    private String photoAddress;
+
+    @Column(nullable = false)
     private String ipAddress;
 
     // ... el resto de la clase (constructores, getters, setters) no cambia ...
@@ -42,12 +47,12 @@ public class User {
 
     // --- Getters y Setters ---
 
-    public int getId() {
-        return id;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setUserId(int id) {
+        this.userId = id;
     }
 
     public String getUsername() {
@@ -72,6 +77,14 @@ public class User {
 
     public void setHashedPassword(String hashedPassword) {
         this.hashedPassword = hashedPassword;
+    }
+
+    public String getPhotoAddress() {
+        return photoAddress;
+    }
+
+    public void setPhotoAddress(String photoAddress) {
+        this.photoAddress = photoAddress;
     }
 
     public String getIpAddress() {

@@ -10,5 +10,5 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
 
     // Creamos un método para buscar todos los mensajes de un canal específico.
     // Spring generará la consulta SQL basándose en el nombre del método.
-    List<Message> findByChannelId(int channelId);
+    List<Message> findByChannelChannelId(int channelId);
 }

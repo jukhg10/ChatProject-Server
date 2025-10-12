@@ -66,14 +66,14 @@ public class ServerMainWindow extends JFrame {
     private void updateUserDisplay(List<User> users) {
         displayArea.setText("--- REGISTERED USERS ---\n");
         for (User user : users) {
-            displayArea.append("ID: " + user.getId() + ", Username: " + user.getUsername() + ", Email: " + user.getEmail() + "\n");
+            displayArea.append("ID: " + user.getUserId() + ", Username: " + user.getUsername() + ", Email: " + user.getEmail() + "\n");
         }
     }
 
     private void updateChannelDisplay(List<Channel> channels) {
         displayArea.setText("--- ACTIVE CHANNELS ---\n");
         for (Channel channel : channels) {
-            displayArea.append("ID: " + channel.getId() + ", Name: " + channel.getName() + ", Owner: " + channel.getOwner().getUsername() + "\n");
+            displayArea.append("ID: " + channel.getChannelId() + ", Name: " + channel.getName() + ", Owner: " + channel.getOwner().getUsername() + "\n");
         }
     }
 }

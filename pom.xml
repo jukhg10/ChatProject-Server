@@ -22,6 +22,7 @@
         <module>server-controladorVista</module>
         <module>server-vista</module>
         <module>server-app</module>
+        <module>Server-DTO</module>
     </modules>
 
     <properties>

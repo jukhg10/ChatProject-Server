@@ -1,5 +1,6 @@
 package com.arquitectura.domain;
 
+import com.arquitectura.domain.enums.TipoCanal;
 import jakarta.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -10,14 +11,19 @@ public class Channel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Column(name = "channel_id")
+    private int channelId;
 
-    @Column(nullable = false)
+    @Column(name = "channel_name",nullable = false)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY) // Relación: Muchos canales pueden tener un mismo dueño.
     @JoinColumn(name = "owner_id", nullable = false) // Clave foránea en la tabla 'channels'.
     private User owner;
+
+    @Column(nullable = false) // ¡AÑADIDO!
+    @Enumerated(EnumType.STRING) // Indica a JPA cómo guardar el Enum
+    private TipoCanal tipo; // Necesitarás crear un Enum ChannelType { DIRECTO, GRUPO }
 
     @ManyToMany(fetch = FetchType.LAZY) // Relación: Muchos usuarios en muchos canales.
     @JoinTable(
@@ -35,21 +41,29 @@ public class Channel {
     }
 
     // Constructor para crear un nuevo canal
-    public Channel(String name, User owner) {
+    public Channel(  String name,User owner, TipoCanal tipo) {
         this.name = name;
         this.owner = owner;
+        this.tipo = tipo;
         this.members = new ArrayList<>();
-        this.members.add(owner); // El creador es el primer miembro
     }
 
     // --- Getters y Setters ---
 
-    public int getId() {
-        return id;
+    public TipoCanal getTipo() {
+        return tipo;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setTipo(TipoCanal tipo) {
+        this.tipo = tipo;
+    }
+
+    public int getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(int id) {
+        this.channelId = id;
     }
 
     public String getName() {
