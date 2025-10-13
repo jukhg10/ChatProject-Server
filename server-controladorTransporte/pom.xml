@@ -26,7 +26,11 @@
             <artifactId>server-logicaFachada</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        
+        <dependency>
+            <groupId>com.arquitectura</groupId>
+            <artifactId>Server-DTO</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         </dependencies>
-
 </project>

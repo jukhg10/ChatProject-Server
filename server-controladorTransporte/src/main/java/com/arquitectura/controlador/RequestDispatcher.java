@@ -1,7 +1,7 @@
 package com.arquitectura.controlador;
 
+import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto; // <-- IMPORT AÑADIDO
 import com.arquitectura.fachada.IChatFachada;
-// We no longer need to import the concrete ClientHandler here
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,9 +15,7 @@ public class RequestDispatcher {
         this.chatFachada = chatFachada;
     }
 
-    // Change the type here
     public void dispatch(String request, IClientHandler handler) {
-        // ... the rest of the code in this method is IDENTICAL ...
         String[] parts = request.split(";");
         String command = parts[0].toUpperCase();
 
@@ -25,15 +23,26 @@ public class RequestDispatcher {
             switch (command) {
                 case "REGISTRAR":
                     if (parts.length == 4) {
-                        // ... code ...
-                        String ipAddress = handler.getClientIpAddress(); // This still works
-                        chatFachada.registrarUsuario(parts[1], parts[2], parts[3], ipAddress);
-                        handler.sendMessage("OK;Usuario registrado exitosamente."); // This still works
+                        // 1. Se crea el DTO a partir de los datos de la petición.
+                        UserRegistrationRequestDto requestDto = new UserRegistrationRequestDto(
+                            parts[1], // username
+                            parts[2], // email
+                            parts[3]  // password
+                        );
+                        
+                        String ipAddress = handler.getClientIpAddress();
+                        
+                        // 2. Se llama a la fachada con el DTO.
+                        chatFachada.registrarUsuario(requestDto, ipAddress);
+                        
+                        handler.sendMessage("OK;Usuario registrado exitosamente.");
                     } else {
-                        handler.sendMessage("ERROR;Formato incorrecto para REGISTRAR.");
+                        handler.sendMessage("ERROR;Formato incorrecto para REGISTRAR. Se esperaba: REGISTRAR;username;email;password");
                     }
                     break;
-                // ... other cases ...
+
+                // Aquí irían los otros casos para "LOGIN", "SEND_MESSAGE", etc.
+                
                 default:
                     handler.sendMessage("ERROR;Comando desconocido: " + command);
                     break;

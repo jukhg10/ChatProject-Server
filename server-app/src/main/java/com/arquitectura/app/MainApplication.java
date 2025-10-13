@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 
 import javax.swing.*;
 
-// 👇 ESTA LÍNEA SOLUCIONA TODO EL PROBLEMA DE ESCANEO 👇
 @SpringBootApplication(scanBasePackages = "com.arquitectura")
 public class MainApplication {
 
