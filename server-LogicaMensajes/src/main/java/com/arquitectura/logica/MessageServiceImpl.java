@@ -1,10 +1,7 @@
 package com.arquitectura.logica;
 
-import com.arquitectura.domain.Channel;
-import com.arquitectura.domain.Message;
-import com.arquitectura.domain.TextMessage;
-import com.arquitectura.domain.AudioMessage;
-import com.arquitectura.domain.User;
+import com.arquitectura.DTO.Mensajes.SendMessageRequestDto;
+import com.arquitectura.domain.*;
 import com.arquitectura.persistence.ChannelRepository;
 import com.arquitectura.persistence.MessageRepository;
 import com.arquitectura.persistence.UserRepository;
@@ -14,14 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service // Marca esta clase como un servicio de Spring.
+@Service
 public class MessageServiceImpl implements IMessageService {
 
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final ChannelRepository channelRepository;
 
-    // Inyectamos todos los repositorios que necesitamos.
     @Autowired
     public MessageServiceImpl(MessageRepository messageRepository, UserRepository userRepository, ChannelRepository channelRepository) {
         this.messageRepository = messageRepository;
@@ -31,32 +27,28 @@ public class MessageServiceImpl implements IMessageService {
 
     @Override
     @Transactional
-    public Message enviarMensajeTexto(String contenido, int autorId, int canalId) throws Exception {
-        // Buscamos las entidades de autor y canal para asegurar que existen.
+    public Message enviarMensajeTexto(SendMessageRequestDto requestDto, int autorId) throws Exception {
         User autor = userRepository.findById(autorId)
                 .orElseThrow(() -> new Exception("El autor con ID " + autorId + " no existe."));
         
-        Channel canal = channelRepository.findById(canalId)
-                .orElseThrow(() -> new Exception("El canal con ID " + canalId + " no existe."));
+        Channel canal = channelRepository.findById(requestDto.getChannelId())
+                .orElseThrow(() -> new Exception("El canal con ID " + requestDto.getChannelId() + " no existe."));
 
-        // Creamos la nueva entidad de mensaje de texto.
-        TextMessage nuevoMensaje = new TextMessage(autor, canal, contenido);
+        TextMessage nuevoMensaje = new TextMessage(autor, canal, requestDto.getContent());
 
-        // Guardamos el mensaje usando el repositorio.
         return messageRepository.save(nuevoMensaje);
     }
 
     @Override
     @Transactional
-    public Message enviarMensajeAudio(String urlAudio, int autorId, int canalId) throws Exception {
-        // La lógica es idéntica, solo cambia el tipo de mensaje.
+    public Message enviarMensajeAudio(SendMessageRequestDto requestDto, int autorId) throws Exception {
         User autor = userRepository.findById(autorId)
                 .orElseThrow(() -> new Exception("El autor con ID " + autorId + " no existe."));
         
-        Channel canal = channelRepository.findById(canalId)
-                .orElseThrow(() -> new Exception("El canal con ID " + canalId + " no existe."));
+        Channel canal = channelRepository.findById(requestDto.getChannelId())
+                .orElseThrow(() -> new Exception("El canal con ID " + requestDto.getChannelId() + " no existe."));
 
-        AudioMessage nuevoMensaje = new AudioMessage(autor, canal, urlAudio);
+        AudioMessage nuevoMensaje = new AudioMessage(autor, canal, requestDto.getContent());
 
         return messageRepository.save(nuevoMensaje);
     }
@@ -64,8 +56,6 @@ public class MessageServiceImpl implements IMessageService {
     @Override
     @Transactional(readOnly = true)
     public List<Message> obtenerMensajesPorCanal(int canalId) {
-        // ¡CORRECCIÓN APLICADA AQUÍ!
-        // Usamos el nombre de método correcto definido en MessageRepository.
         return messageRepository.findByChannelChannelId(canalId);
     }
 }

@@ -22,15 +22,20 @@
             <artifactId>spring-context</artifactId>
         </dependency>
         <dependency>
-        <groupId>com.arquitectura</groupId>
-        <artifactId>server-dominio</artifactId>
-        <version>${project.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>com.arquitectura</groupId>
-        <artifactId>server-persistencia</artifactId>
-        <version>${project.version}</version>
-    </dependency>
-    </dependencies>
-
+            <groupId>com.arquitectura</groupId>
+            <artifactId>server-dominio</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.arquitectura</groupId>
+            <artifactId>server-persistencia</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.arquitectura</groupId>
+            <artifactId>Server-DTO</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        </dependencies>
 </project>
