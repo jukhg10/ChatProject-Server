@@ -17,6 +17,8 @@
     <file url="file://$PROJECT_DIR$/server-controladorVista/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-dominio/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-dominio/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server-logic-mail/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server-logic-mail/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-logicaFachada/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-logicaFachada/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server-logicaUsuarios/src/main/java" charset="UTF-8" />

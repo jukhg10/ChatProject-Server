@@ -3,6 +3,7 @@ package com.arquitectura.logica;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.User;
+import com.arquitectura.mail.EmailService;
 import com.arquitectura.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,12 +20,14 @@ public class UserServiceImpl implements IUserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     // 2. Inyección de dependencias por constructor. Spring nos pasará las instancias automáticamente.
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = new BCryptPasswordEncoder(); // Usamos un codificador de contraseñas robusto.
+        this.emailService = emailService;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class UserServiceImpl implements IUserService {
         // El campo 'photoAddress' se puede establecer aquí si viene en el DTO o más tarde.
 
         User savedUser = userRepository.save(newUserEntity);
-
+        emailService.enviarCredenciales(savedUser.getEmail(), savedUser.getUsername(), requestDto.getPassword());
         // --- Estrategia de Mapeo: Entidad -> DTO ---
         return new UserResponseDto(
                 savedUser.getUserId(),

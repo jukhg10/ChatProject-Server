@@ -9,43 +9,28 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>server-logicaUsuarios</artifactId>
+    <artifactId>server-logic-mail</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
+            <artifactId>spring-context-support</artifactId>
         </dependency>
         <dependency>
-        <groupId>com.arquitectura</groupId>
-        <artifactId>server-dominio</artifactId>
-        <version>${project.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>com.arquitectura</groupId>
-        <artifactId>server-persistencia</artifactId>
-        <version>${project.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>com.arquitectura</groupId>
-        <artifactId>Server-DTO</artifactId>
-        <version>${project.version}</version>
-    </dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>jakarta.mail</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.arquitectura</groupId>
-            <artifactId>server-logic-mail</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>Server-DTO</artifactId>
+            <version>${project.version}</version>
         </dependency>
-    <dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-crypto</artifactId>
-    <version>6.4.4</version>
-    </dependency>
 
     </dependencies>
 
