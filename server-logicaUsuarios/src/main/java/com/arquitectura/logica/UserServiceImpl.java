@@ -1,14 +1,18 @@
 package com.arquitectura.logica;
 
+import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
+import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.User;
 import com.arquitectura.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service // 1. Marca esta clase como un componente de servicio de Spring.
 public class UserServiceImpl implements IUserService {
@@ -24,27 +28,52 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public User registrarUsuario(String username, String email, String password, String ipAddress) throws Exception {
-        // 3. Verificamos que el usuario no exista.
-        if (userRepository.findByUsername(username).isPresent()) {
+    @Transactional
+    public UserResponseDto registrarUsuario(UserRegistrationRequestDto requestDto, String ipAddress) throws Exception {
+        if (userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
             throw new Exception("El nombre de usuario ya está en uso.");
         }
+        // Aquí podrías añadir la validación de email si la necesitas.
 
-        // 4. Hasheamos la contraseña antes de guardarla. ¡Nunca guardes contraseñas en texto plano!
-        String hashedPassword = passwordEncoder.encode(password);
+        String hashedPassword = passwordEncoder.encode(requestDto.getPassword());
 
-        // 5. Creamos la nueva entidad User.
-        User newUser = new User(username, email, hashedPassword, ipAddress);
+        // --- Estrategia de Mapeo: DTO -> Entidad ---
+        User newUserEntity = new User();
+        newUserEntity.setUsername(requestDto.getUsername());
+        newUserEntity.setEmail(requestDto.getEmail());
+        newUserEntity.setHashedPassword(hashedPassword);
+        newUserEntity.setIpAddress(ipAddress);
+        // El campo 'photoAddress' se puede establecer aquí si viene en el DTO o más tarde.
 
-        // 6. Usamos el repositorio para guardar el usuario en la base de datos.
-        return userRepository.save(newUser);
+        User savedUser = userRepository.save(newUserEntity);
+
+        // --- Estrategia de Mapeo: Entidad -> DTO ---
+        return new UserResponseDto(
+                savedUser.getUserId(),
+                savedUser.getUsername(),
+                savedUser.getEmail(),
+                savedUser.getPhotoAddress()
+        );
     }
     @Override
-public List<User> obtenerTodosLosUsuarios() {
-    return userRepository.findAll(); // Simplemente llamamos al método que nos da el repositorio.
-}
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> obtenerTodosLosUsuarios() {
+        return userRepository.findAll().stream()
+                .map(user -> new UserResponseDto(
+                        user.getUserId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getPhotoAddress()))
+                .collect(Collectors.toList());
+    }
     @Override
-    public Optional<User> buscarPorUsername(String username) {
-        return userRepository.findByUsername(username);
+    @Transactional(readOnly = true)
+    public Optional<UserResponseDto> buscarPorUsername(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> new UserResponseDto(
+                        user.getUserId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getPhotoAddress()));
     }
 }

@@ -21,16 +21,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
-        <dependency>
-        <groupId>com.arquitectura</groupId>
-        <artifactId>server-dominio</artifactId>
-        <version>${project.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>com.arquitectura</groupId>
-        <artifactId>server-persistencia</artifactId>
-        <version>${project.version}</version>
-    </dependency>
      <dependency>
             <groupId>com.arquitectura</groupId>
             <artifactId>server-logicaUsuarios</artifactId>
@@ -41,7 +31,6 @@
             <artifactId>server-LogicaCanales</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.arquitectura</groupId>
             <artifactId>server-LogicaMensajes</artifactId>
