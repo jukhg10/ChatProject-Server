@@ -1,5 +1,6 @@
 package com.arquitectura.logica;
 
+import com.arquitectura.DTO.usuarios.LoginRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.User;
@@ -57,6 +58,29 @@ public class UserServiceImpl implements IUserService {
             savedUser.getUsername(),
             savedUser.getEmail(),
             savedUser.getPhotoAddress()
+        );
+    }
+    @Override
+    @Transactional
+    public UserResponseDto autenticarUsuario(LoginRequestDto requestDto, String ipAddress) throws Exception {
+        // 1. Buscar al usuario por su nombre de usuario
+        User user = userRepository.findByUsername(requestDto.getUsername())
+                .orElseThrow(() -> new Exception("Credenciales incorrectas.")); // Mensaje genérico por seguridad
+
+        // 2. Verificar que la contraseña coincida
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getHashedPassword())) {
+            throw new Exception("Credenciales incorrectas.");
+        }
+        // Actualizamos la IP del usuario con la de la conexión actual
+        user.setIpAddress(ipAddress);
+        userRepository.save(user);
+
+        // 3. Si todo está bien, mapear la entidad a un DTO de respuesta y devolverlo
+        return new UserResponseDto(
+                user.getUserId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPhotoAddress()
         );
     }
 

@@ -1,5 +1,6 @@
 package com.arquitectura.logica;
 
+import com.arquitectura.DTO.canales.ChannelResponseDto;
 import com.arquitectura.DTO.canales.CreateChannelRequestDto;
 import com.arquitectura.DTO.canales.InviteMemberRequestDto;
 import com.arquitectura.DTO.canales.RespondToInviteRequestDto;
@@ -18,10 +19,10 @@ public interface IChannelService {
      * @return El canal recién creado y guardado.
      */
 
-    Channel crearCanal(CreateChannelRequestDto requestDto, int idOwner) throws Exception;
+    ChannelResponseDto crearCanal(CreateChannelRequestDto requestDto, int idOwner) throws Exception;
 
     //chats 1 a 1
-    Channel crearCanalDirecto(int user1Id, int user2Id) throws Exception;
+    ChannelResponseDto crearCanalDirecto(int user1Id, int user2Id) throws Exception;
 
     /**
      * Procesa una invitación de un propietario de canal a un nuevo miembro.
@@ -29,7 +30,7 @@ public interface IChannelService {
      * @param ownerId El ID del usuario que realiza la invitación (para validación).
      * @return La nueva membresía en estado PENDIENTE.
      */
-    MembresiaCanal invitarMiembro(InviteMemberRequestDto requestDto, int ownerId) throws Exception;
+    void invitarMiembro(InviteMemberRequestDto requestDto, int ownerId) throws Exception;
 
     /**
      * Procesa la respuesta de un usuario a una invitación de canal.
@@ -37,19 +38,19 @@ public interface IChannelService {
      * @param userId El ID del usuario que está respondiendo.
      * @return La membresía actualizada si se aceptó, o null si se rechazó.
      */
-    MembresiaCanal responderInvitacion(RespondToInviteRequestDto requestDto, int userId) throws Exception;
+    void responderInvitacion(RespondToInviteRequestDto requestDto, int userId) throws Exception;
 
 
     /**
      * Obtiene todos los canales disponibles.
      * @return Una lista de todos los canales.
      */
-    List<Channel> obtenerTodosLosCanales();
+    List<ChannelResponseDto> obtenerTodosLosCanales();
 
     /**
      * Busca un canal por su ID.
      * @param channelId El ID del canal.
      * @return Un Optional que contiene el canal si se encuentra.
      */
-    Optional<Channel> findById(int channelId);
+    Optional<ChannelResponseDto> findById(int channelId);
 }

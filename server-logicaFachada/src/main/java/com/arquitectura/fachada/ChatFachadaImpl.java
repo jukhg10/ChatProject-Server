@@ -1,8 +1,11 @@
 package com.arquitectura.fachada;
 
+import com.arquitectura.DTO.Mensajes.MessageResponseDto;
+import com.arquitectura.DTO.canales.ChannelResponseDto;
 import com.arquitectura.DTO.canales.CreateChannelRequestDto;
 import com.arquitectura.DTO.Mensajes.SendMessageRequestDto;
 import com.arquitectura.DTO.canales.InviteMemberRequestDto;
+import com.arquitectura.DTO.usuarios.LoginRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.Channel;
@@ -32,62 +35,61 @@ public class ChatFachadaImpl implements IChatFachada {
         this.messageService = messageService;
     }
 
-    // ... (métodos de usuario y canal sin cambios) ...
-
-    // --- MÉTODOS DE MENSAJE (ACTUALIZADOS) ---
+    // Metodos de usuario
     @Override
-    public Message enviarMensajeTexto(SendMessageRequestDto requestDto, int autorId) throws Exception {
-        // La fachada ahora delega la llamada al método correspondiente del servicio
-        return messageService.enviarMensajeTexto(requestDto, autorId);
+    public UserResponseDto registrarUsuario(UserRegistrationRequestDto requestDto, String ipAddress) throws Exception {
+        return userService.registrarUsuario(requestDto, ipAddress);
     }
 
     @Override
-    public Message enviarMensajeAudio(SendMessageRequestDto requestDto, int autorId) throws Exception {
-        // La fachada ahora delega la llamada al método correspondiente del servicio
-        return messageService.enviarMensajeAudio(requestDto, autorId);
+    public Optional<UserResponseDto> buscarUsuarioPorUsername(String username) {
+        return userService.buscarPorUsername(username);
     }
 
     @Override
-    public List<Message> obtenerMensajesDeCanal(int canalId) {
-        return messageService.obtenerMensajesPorCanal(canalId);
-    }
-    
-    // --- Implementación del resto de métodos ---
-    
-    @Override
-    public User registrarUsuario(UserRegistrationRequestDto requestDto, String ipAddress) throws Exception {
-        UserResponseDto responseDto = userService.registrarUsuario(requestDto, ipAddress);
-        return userService.findEntityById(responseDto.getUserId())
-                .orElseThrow(() -> new IllegalStateException("No se pudo encontrar el usuario recién registrado."));
+    public List<UserResponseDto> obtenerTodosLosUsuarios() {
+        return userService.obtenerTodosLosUsuarios();
     }
 
     @Override
-    public Optional<User> buscarUsuarioPorUsername(String username) {
-        return userService.buscarPorUsername(username)
-                .flatMap(dto -> userService.findEntityById(dto.getUserId()));
+    public UserResponseDto autenticarUsuario(LoginRequestDto requestDto, String ipAddress) throws Exception {
+        return userService.autenticarUsuario(requestDto, ipAddress);
     }
 
-    @Override
-    public List<User> obtenerTodosLosUsuarios() {
-        return userService.obtenerTodosLosUsuarios().stream()
-               .map(dto -> userService.findEntityById(dto.getUserId()))
-               .filter(Optional::isPresent)
-               .map(Optional::get)
-               .collect(Collectors.toList());
-    }
 
+    // --- MÉTODOS DE Canales ---
     @Override
-    public Channel crearCanal(CreateChannelRequestDto requestDto, int ownerId) throws Exception {
+    public ChannelResponseDto crearCanal(CreateChannelRequestDto requestDto, int ownerId) throws Exception {
         return channelService.crearCanal(requestDto, ownerId);
     }
 
     @Override
-    public Channel agregarMiembroACanal(InviteMemberRequestDto inviteMemberRequestDto, int userId) throws Exception {
-        return channelService.invitarMiembro(inviteMemberRequestDto, userId);
+    public void agregarMiembroACanal(InviteMemberRequestDto inviteMemberRequestDto, int userId) throws Exception {
+        channelService.invitarMiembro(inviteMemberRequestDto, userId);
     }
 
     @Override
-    public List<Channel> obtenerTodosLosCanales() {
+    public List<ChannelResponseDto> obtenerTodosLosCanales() {
         return channelService.obtenerTodosLosCanales();
     }
+
+    
+    // ---Metodos de Mensajes---
+    @Override
+    public MessageResponseDto enviarMensajeTexto(SendMessageRequestDto requestDto, int autorId) throws Exception {
+        return messageService.enviarMensajeTexto(requestDto, autorId);
+    }
+
+    @Override
+    public MessageResponseDto enviarMensajeAudio(SendMessageRequestDto requestDto, int autorId) throws Exception {
+        return messageService.enviarMensajeAudio(requestDto, autorId);
+    }
+
+    @Override
+    public List<MessageResponseDto> obtenerMensajesDeCanal(int canalId) {
+        return messageService.obtenerMensajesPorCanal(canalId);
+    }
+    
+
+
 }

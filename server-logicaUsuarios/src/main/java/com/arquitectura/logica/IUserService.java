@@ -1,5 +1,6 @@
 package com.arquitectura.logica;
 
+import com.arquitectura.DTO.usuarios.LoginRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.User; // Se mantiene para un método interno
@@ -36,4 +37,11 @@ public interface IUserService {
      * @return Un Optional que contiene la entidad User si se encuentra.
      */
     Optional<User> findEntityById(int id);
+    /**
+     * Autentica a un usuario con su nombre de usuario y contraseña.
+     * @param requestDto DTO con las credenciales.
+     * @return Un DTO con la información del usuario si la autenticación es exitosa.
+     * @throws Exception si las credenciales son incorrectas o el usuario no existe.
+     */
+    UserResponseDto autenticarUsuario(LoginRequestDto requestDto, String ipAddress) throws Exception;
 }

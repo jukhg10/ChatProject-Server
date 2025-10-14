@@ -1,5 +1,6 @@
 package com.arquitectura.transporte;
 
+import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.controlador.IClientHandler; // <-- Asegúrate de que este import exista
 import com.arquitectura.controlador.RequestDispatcher;
 import java.io.BufferedReader;
@@ -16,6 +17,7 @@ public class ClientHandler implements Runnable, IClientHandler {
     private PrintWriter out;
     private BufferedReader in;
     private final Consumer<ClientHandler> onDisconnect;
+    private UserResponseDto authenticatedUser = null;
 
     public ClientHandler(Socket socket, RequestDispatcher dispatcher, Consumer<ClientHandler> onDisconnect) {
         this.clientSocket = socket;
@@ -56,5 +58,23 @@ public class ClientHandler implements Runnable, IClientHandler {
     @Override
     public String getClientIpAddress() {
         return clientSocket.getInetAddress().getHostAddress();
+    }
+    @Override
+    public void setAuthenticatedUser(UserResponseDto user) {
+        this.authenticatedUser = user;
+    }
+
+    @Override
+    public UserResponseDto getAuthenticatedUser() {
+        return this.authenticatedUser;
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        return this.authenticatedUser != null;
+    }
+    @Override
+    public void clearAuthenticatedUser() {
+        this.authenticatedUser = null;
     }
 }

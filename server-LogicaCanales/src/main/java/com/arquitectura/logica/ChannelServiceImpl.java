@@ -1,8 +1,10 @@
 package com.arquitectura.logica;
 
+import com.arquitectura.DTO.canales.ChannelResponseDto;
 import com.arquitectura.DTO.canales.CreateChannelRequestDto; // <-- IMPORT AÑADIDO
 import com.arquitectura.DTO.canales.InviteMemberRequestDto;
 import com.arquitectura.DTO.canales.RespondToInviteRequestDto;
+import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.Channel;
 import com.arquitectura.domain.MembresiaCanal;
 import com.arquitectura.domain.MembresiaCanalId;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ChannelServiceImpl implements IChannelService {
@@ -35,7 +38,7 @@ public class ChannelServiceImpl implements IChannelService {
 
     @Override
     @Transactional
-    public Channel crearCanal(CreateChannelRequestDto requestDto, int idOwner) throws Exception {
+    public ChannelResponseDto crearCanal(CreateChannelRequestDto requestDto, int idOwner) throws Exception {
         User owner = userRepository.findById(idOwner)
                 .orElseThrow(() -> new Exception("El usuario con ID " + idOwner + " no existe."));
         // Se extraen los datos del DTO
@@ -44,19 +47,21 @@ public class ChannelServiceImpl implements IChannelService {
             throw new Exception("Los canales directos deben crearse con el método crearCanalDirecto.");
         }
         Channel newChannel = new Channel(requestDto.getChannelName(), owner, tipo);
+        // Se guarda primero para obtener el ID del canal
+        Channel savedChannel = channelRepository.save(newChannel);
         //Creador se agrega automáticamente como miembro
         MembresiaCanal membresiaInicial = new MembresiaCanal(
-            new MembresiaCanalId(newChannel.getChannelId(), idOwner),
+                new MembresiaCanalId(savedChannel.getChannelId(), idOwner),
                 owner,
                 newChannel,
                 EstadoMembresia.ACTIVO
         );
-        newChannel.getMembresias().add(membresiaInicial);
-        return channelRepository.save(newChannel);
+        membresiaCanalRepository.save(membresiaInicial);
+        return mapToChannelResponseDto(savedChannel);
     }
     @Override
     @Transactional
-    public Channel crearCanalDirecto(int user1Id, int user2Id) throws Exception {
+    public ChannelResponseDto crearCanalDirecto(int user1Id, int user2Id) throws Exception {
         if (user1Id == user2Id) {
             throw new Exception("No se puede crear un canal directo con uno mismo.");
         }
@@ -65,13 +70,13 @@ public class ChannelServiceImpl implements IChannelService {
         Optional<Channel> existingChannel = channelRepository.findDirectChannelBetweenUsers(TipoCanal.DIRECTO, user1Id, user2Id);
         if (existingChannel.isPresent()) {
             System.out.println("Canal directo ya existe entre " + user1Id + " y " + user2Id + ". Devolviendo existente.");
-            return existingChannel.get();
+            return mapToChannelResponseDto(existingChannel.get());
         }
         // Hacemos la búsqueda inversa por si se creó al revés
         existingChannel = channelRepository.findDirectChannelBetweenUsers(TipoCanal.DIRECTO, user2Id, user1Id);
         if (existingChannel.isPresent()) {
             System.out.println("Canal directo ya existe entre " + user2Id + " y " + user1Id + ". Devolviendo existente.");
-            return existingChannel.get();
+            return mapToChannelResponseDto(existingChannel.get());
         }
         // Si no existe, procedemos a crear uno nuevo
         User user1 = userRepository.findById(user1Id).orElseThrow(() -> new Exception("El usuario con ID " + user1Id + " no existe."));
@@ -84,12 +89,12 @@ public class ChannelServiceImpl implements IChannelService {
         anadirMiembroConEstado(savedChannel, user1, EstadoMembresia.ACTIVO);
         anadirMiembroConEstado(savedChannel, user2, EstadoMembresia.ACTIVO);
         // Volvemos a guardar para persistir las nuevas membresías
-        return savedChannel;
+        return mapToChannelResponseDto(savedChannel);
     }
     
     @Override
     @Transactional
-    public MembresiaCanal invitarMiembro(InviteMemberRequestDto inviteMemberRequestDto,int ownerId) throws Exception {
+    public void invitarMiembro(InviteMemberRequestDto inviteMemberRequestDto,int ownerId) throws Exception {
         Channel channel = channelRepository.findById(inviteMemberRequestDto.getChannelId())
                 .orElseThrow(() -> new Exception("Canal no encontrado."));
 
@@ -112,12 +117,12 @@ public class ChannelServiceImpl implements IChannelService {
         }
 
         MembresiaCanal nuevaInvitacion = new MembresiaCanal(membresiaId, userToInvite, channel, EstadoMembresia.PENDIENTE);
-        return membresiaCanalRepository.save(nuevaInvitacion);
+        membresiaCanalRepository.save(nuevaInvitacion);
     }
 
     @Override
     @Transactional
-    public MembresiaCanal responderInvitacion(RespondToInviteRequestDto requestDto, int userId) throws Exception {
+    public void responderInvitacion(RespondToInviteRequestDto requestDto, int userId) throws Exception {
         MembresiaCanalId membresiaId = new MembresiaCanalId(requestDto.getChannelId(), userId);
 
         MembresiaCanal invitacion = membresiaCanalRepository.findById(membresiaId)
@@ -129,23 +134,49 @@ public class ChannelServiceImpl implements IChannelService {
 
         if (requestDto.isAccepted()) {
             invitacion.setEstado(EstadoMembresia.ACTIVO);
-            return membresiaCanalRepository.save(invitacion);
+            membresiaCanalRepository.save(invitacion);
         } else {
             membresiaCanalRepository.delete(invitacion);
-            return null;
+
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Channel> obtenerTodosLosCanales() {
-        return channelRepository.findAll();
+    public List<ChannelResponseDto> obtenerTodosLosCanales() {
+        return channelRepository.findAll().stream()
+                .map(this::mapToChannelResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Channel> findById(int channelId) {
-        return channelRepository.findById(channelId);
+    public Optional<ChannelResponseDto> findById(int channelId) {
+        return channelRepository.findById(channelId)
+                .map(this::mapToChannelResponseDto);
+    }
+
+    /**
+     * Mapea una entidad Channel a su correspondiente ChannelResponseDto.
+     * @param channel La entidad a convertir.
+     * @return El DTO con la información pública.
+     */
+    private ChannelResponseDto mapToChannelResponseDto(Channel channel) {
+        // Mapea el propietario a su DTO
+        UserResponseDto ownerDto = new UserResponseDto(
+                channel.getOwner().getUserId(),
+                channel.getOwner().getUsername(),
+                channel.getOwner().getEmail(),
+                channel.getOwner().getPhotoAddress()
+        );
+
+        // Crea y devuelve el DTO del canal
+        return new ChannelResponseDto(
+                channel.getChannelId(),
+                channel.getName(),
+                channel.getTipo().toString(),
+                ownerDto
+        );
     }
 
     private void anadirMiembroConEstado(Channel channel, User user, EstadoMembresia estado) {

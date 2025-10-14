@@ -1,6 +1,8 @@
 package com.arquitectura.transporte;
 
 import com.arquitectura.controlador.RequestDispatcher;
+import com.arquitectura.logica.eventos.BroadcastMessageEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -13,16 +15,23 @@ import java.util.concurrent.Executors;
 
 @Component
 public class ServerListener {
-
     private static final int PORT = 12345; // Puerto en el que escuchará el servidor
     private static final int MAX_CONNECTED_USERS = 50; // Límite de usuarios
-
-    // Usamos un Object Pool (ThreadPool) para manejar los clientes de forma eficiente
-    private final ExecutorService clientPool = Executors.newFixedThreadPool(MAX_CONNECTED_USERS);
-
     private final RequestDispatcher requestDispatcher;
     // Usamos un Set sincronizado para mantener una lista segura de los manejadores de cliente.
     private final Set<ClientHandler> activeClients = Collections.synchronizedSet(new HashSet<>());
+    // Usamos un Object Pool (ThreadPool) para manejar los clientes de forma eficiente
+    private final ExecutorService clientPool = Executors.newFixedThreadPool(MAX_CONNECTED_USERS);
+
+    public ServerListener(RequestDispatcher requestDispatcher) {
+        this.requestDispatcher = requestDispatcher;
+    }
+
+    @EventListener
+    public void handleBroadcastEvent(BroadcastMessageEvent event) {
+        System.out.println("Evento de Broadcast recibido. Enviando a los clientes...");
+        broadcastMessage(event.getFormattedMessage());
+    }
 
     public void startServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
@@ -39,15 +48,17 @@ public class ServerListener {
             System.err.println("Error al iniciar el servidor: " + e.getMessage());
         }
     }
-    public void broadcastMessage(String message) {
+
+
+    private void broadcastMessage(String message) {
         System.out.println("Enviando broadcast a " + activeClients.size() + " clientes.");
-        // Iteramos sobre la lista de clientes activos y enviamos el mensaje a cada uno
         synchronized (activeClients) {
             for (ClientHandler client : activeClients) {
                 client.sendMessage(message);
             }
         }
     }
+
 
     // Método para que los ClientHandlers se eliminen de la lista al desconectarse
     private void removeClient(ClientHandler clientHandler) {
