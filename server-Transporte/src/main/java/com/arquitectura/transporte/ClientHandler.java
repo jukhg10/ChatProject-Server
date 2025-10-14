@@ -3,9 +3,11 @@ package com.arquitectura.transporte;
 import com.arquitectura.controlador.IClientHandler; // <-- Asegúrate de que este import exista
 import com.arquitectura.controlador.RequestDispatcher;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.function.Consumer;
 
 public class ClientHandler implements Runnable, IClientHandler {
 
@@ -13,10 +15,12 @@ public class ClientHandler implements Runnable, IClientHandler {
     private final RequestDispatcher requestDispatcher;
     private PrintWriter out;
     private BufferedReader in;
+    private final Consumer<ClientHandler> onDisconnect;
 
-    public ClientHandler(Socket socket, RequestDispatcher dispatcher) {
+    public ClientHandler(Socket socket, RequestDispatcher dispatcher, Consumer<ClientHandler> onDisconnect) {
         this.clientSocket = socket;
         this.requestDispatcher = dispatcher;
+        this.onDisconnect = onDisconnect;
     }
 
     @Override
@@ -33,7 +37,14 @@ public class ClientHandler implements Runnable, IClientHandler {
         } catch (Exception e) {
             System.out.println("Cliente desconectado: " + e.getMessage());
         } finally {
-            // Código para cerrar la conexión
+            onDisconnect.accept(this);
+            try {
+                if (in != null) in.close();
+                if (out != null) out.close();
+                if (clientSocket != null) clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

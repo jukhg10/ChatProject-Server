@@ -1,8 +1,11 @@
 package com.arquitectura.logica;
 
 import com.arquitectura.DTO.canales.CreateChannelRequestDto;
+import com.arquitectura.DTO.canales.InviteMemberRequestDto;
+import com.arquitectura.DTO.canales.RespondToInviteRequestDto;
 import com.arquitectura.domain.Channel;
-import com.arquitectura.domain.User;
+import com.arquitectura.domain.MembresiaCanal;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,20 +14,31 @@ public interface IChannelService {
     /**
      * Crea un nuevo canal en el sistema.
      * @param requestDto El DTO con la información del canal a crear.
-     * @param owner El usuario que crea el canal (dueño).
+     * @param idOwner El usuario que crea el canal (dueño).
      * @return El canal recién creado y guardado.
      */
-    // La declaración del método debe terminar con un punto y coma.
-    Channel crearCanal(CreateChannelRequestDto requestDto, User owner); // <-- PUNTO Y COMA AÑADIDO
+
+    Channel crearCanal(CreateChannelRequestDto requestDto, int idOwner) throws Exception;
+
+    //chats 1 a 1
+    Channel crearCanalDirecto(int user1Id, int user2Id) throws Exception;
 
     /**
-     * Agrega un usuario como miembro a un canal existente.
-     * @param channelId El ID del canal.
-     * @param userId El ID del usuario a agregar.
-     * @return El canal actualizado con el nuevo miembro.
-     * @throws Exception si el canal o el usuario no existen, o si el usuario ya es miembro.
+     * Procesa una invitación de un propietario de canal a un nuevo miembro.
+     * @param requestDto DTO con el ID del canal y el ID del usuario a invitar.
+     * @param ownerId El ID del usuario que realiza la invitación (para validación).
+     * @return La nueva membresía en estado PENDIENTE.
      */
-    Channel agregarMiembro(int channelId, int userId) throws Exception;
+    MembresiaCanal invitarMiembro(InviteMemberRequestDto requestDto, int ownerId) throws Exception;
+
+    /**
+     * Procesa la respuesta de un usuario a una invitación de canal.
+     * @param requestDto DTO con el ID del canal y la decisión (aceptar/rechazar).
+     * @param userId El ID del usuario que está respondiendo.
+     * @return La membresía actualizada si se aceptó, o null si se rechazó.
+     */
+    MembresiaCanal responderInvitacion(RespondToInviteRequestDto requestDto, int userId) throws Exception;
+
 
     /**
      * Obtiene todos los canales disponibles.

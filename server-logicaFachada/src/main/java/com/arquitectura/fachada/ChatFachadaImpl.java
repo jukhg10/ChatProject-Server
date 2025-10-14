@@ -2,6 +2,7 @@ package com.arquitectura.fachada;
 
 import com.arquitectura.DTO.canales.CreateChannelRequestDto;
 import com.arquitectura.DTO.Mensajes.SendMessageRequestDto;
+import com.arquitectura.DTO.canales.InviteMemberRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.Channel;
@@ -76,13 +77,13 @@ public class ChatFachadaImpl implements IChatFachada {
     }
 
     @Override
-    public Channel crearCanal(CreateChannelRequestDto requestDto, User owner) {
-        return channelService.crearCanal(requestDto, owner);
+    public Channel crearCanal(CreateChannelRequestDto requestDto, int ownerId) throws Exception {
+        return channelService.crearCanal(requestDto, ownerId);
     }
 
     @Override
-    public Channel agregarMiembroACanal(int channelId, int userId) throws Exception {
-        return channelService.agregarMiembro(channelId, userId);
+    public Channel agregarMiembroACanal(InviteMemberRequestDto inviteMemberRequestDto, int userId) throws Exception {
+        return channelService.invitarMiembro(inviteMemberRequestDto, userId);
     }
 
     @Override

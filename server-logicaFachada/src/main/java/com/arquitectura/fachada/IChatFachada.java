@@ -2,6 +2,7 @@ package com.arquitectura.fachada;
 
 import com.arquitectura.DTO.canales.CreateChannelRequestDto;
 import com.arquitectura.DTO.Mensajes.SendMessageRequestDto; // <-- IMPORT AÑADIDO
+import com.arquitectura.DTO.canales.InviteMemberRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.domain.Channel;
 import com.arquitectura.domain.Message;
@@ -18,8 +19,8 @@ public interface IChatFachada {
     List<User> obtenerTodosLosUsuarios();
 
     // --- Métodos de Canal ---
-    Channel crearCanal(CreateChannelRequestDto requestDto, User owner);
-    Channel agregarMiembroACanal(int channelId, int userId) throws Exception;
+    Channel crearCanal(CreateChannelRequestDto requestDto, int ownerId) throws Exception;
+    Channel agregarMiembroACanal(InviteMemberRequestDto inviteMemberRequestDto, int userId) throws Exception;
     List<Channel> obtenerTodosLosCanales();
 
     // --- MÉTODOS DE MENSAJE (ACTUALIZADOS) ---

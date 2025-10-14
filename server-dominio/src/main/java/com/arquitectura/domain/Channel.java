@@ -2,8 +2,11 @@ package com.arquitectura.domain;
 
 import com.arquitectura.domain.enums.TipoCanal;
 import jakarta.persistence.*;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 
 @Entity
 @Table(name = "channels")
@@ -25,27 +28,17 @@ public class Channel {
     @Enumerated(EnumType.STRING) // Indica a JPA cómo guardar el Enum
     private TipoCanal tipo; // Necesitarás crear un Enum ChannelType { DIRECTO, GRUPO }
 
-    @ManyToMany(fetch = FetchType.LAZY) // Relación: Muchos usuarios en muchos canales.
-    @JoinTable(
-        name = "channel_members", // Nombre de la tabla intermedia.
-        joinColumns = @JoinColumn(name = "channel_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> members;
+    @OneToMany(mappedBy = "canal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MembresiaCanal> membresias;
 
-    // ... el resto de la clase (constructores, getters, setters) no cambia ...
 
-    // Constructor vacío
-    public Channel() {
-        this.members = new ArrayList<>();
-    }
 
     // Constructor para crear un nuevo canal
     public Channel(  String name,User owner, TipoCanal tipo) {
         this.name = name;
         this.owner = owner;
         this.tipo = tipo;
-        this.members = new ArrayList<>();
+        this.membresias = new HashSet<>();
     }
 
     // --- Getters y Setters ---
@@ -82,23 +75,11 @@ public class Channel {
         this.owner = owner;
     }
 
-    public List<User> getMembers() {
-        return members;
+    public Set<MembresiaCanal> getMembresias() {
+        return membresias;
     }
 
-    public void setMembers(List<User> members) {
-        this.members = members;
-    }
-
-    // --- Métodos de utilidad ---
-
-    public void addMember(User user) {
-        if (!this.members.contains(user)) {
-            this.members.add(user);
-        }
-    }
-
-    public void removeMember(User user) {
-        this.members.remove(user);
+    public void setMembresias(Set<MembresiaCanal> membresias) {
+        this.membresias = membresias;
     }
 }
