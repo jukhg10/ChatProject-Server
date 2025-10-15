@@ -1,12 +1,17 @@
 package com.arquitectura.controlador;
 
 import com.arquitectura.DTO.Mensajes.SendMessageRequestDto;
+import com.arquitectura.DTO.canales.ChannelResponseDto;
+import com.arquitectura.DTO.canales.CreateChannelRequestDto;
 import com.arquitectura.DTO.usuarios.LoginRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto; // <-- IMPORT AÑADIDO
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.fachada.IChatFachada;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class RequestDispatcher {
@@ -52,8 +57,6 @@ public class RequestDispatcher {
                             // 4. Enviar respuesta de éxito al cliente
                             // Es útil devolver el ID y el username para que el cliente los guarde
                             handler.sendMessage("OK;LOGIN_SUCCESS;" + userDto.getUserId() + ";" + userDto.getUsername());
-
-
                         }
                     }
                     break;
@@ -66,6 +69,36 @@ public class RequestDispatcher {
 
                     handler.sendMessage("OK;LOGOUT;Sesión de " + username + " cerrada.");
                     break;
+                case "OBTENER_USUARIOS":
+                    // 1. Llamar a la fachada para obtener la lista de DTOs de usuario
+                    List<UserResponseDto> usuarios = chatFachada.obtenerTodosLosUsuarios();
+                    Gson gson = new Gson();
+                    String jsonUsuarios = gson.toJson(usuarios);
+
+                    // 3. Enviar la lista al cliente
+                    handler.sendMessage("OK;OBTENER_USUARIOS;" + jsonUsuarios);
+                    break;
+
+                case "CREAR_CANAL_GRUPO":
+                    if (parts.length == 2) {
+                        String channelName = parts[1];
+
+                        // 1. Obtener el ID del creador desde la sesión del handler
+                        int ownerId = handler.getAuthenticatedUser().getUserId();
+
+                        // 2. Crear el DTO de la petición
+                        CreateChannelRequestDto createDto = new CreateChannelRequestDto(channelName, "GRUPO");
+
+                        // 3. Llamar a la fachada
+                        ChannelResponseDto channelDto = chatFachada.crearCanal(createDto, ownerId);
+
+                        // 4. Enviar una respuesta de éxito al cliente con los datos del nuevo canal
+                        handler.sendMessage("OK;CREAR_CANAL_GRUPO;" + channelDto.getChannelId() + ";" + channelDto.getChannelName());
+                    } else {
+                        handler.sendMessage("ERROR;CREAR_CANAL_GRUPO;Formato incorrecto. Se esperaba: CREAR_CANAL_GRUPO;nombre_canal");
+                    }
+                    break;
+
                 case "ENVIAR_MENSAJE_TEXTO":
                     // Ejemplo de cómo usar la sesión en otros comandos
                     String[] messageParts = parts[1].split(";", 2);

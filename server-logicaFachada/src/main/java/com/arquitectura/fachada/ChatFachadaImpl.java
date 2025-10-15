@@ -8,18 +8,14 @@ import com.arquitectura.DTO.canales.InviteMemberRequestDto;
 import com.arquitectura.DTO.usuarios.LoginRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
-import com.arquitectura.domain.Channel;
-import com.arquitectura.domain.Message;
-import com.arquitectura.domain.User;
-import com.arquitectura.logica.IChannelService;
-import com.arquitectura.logica.IMessageService;
-import com.arquitectura.logica.IUserService;
+import com.arquitectura.logicaCanales.IChannelService;
+import com.arquitectura.logicaMensajes.IMessageService;
+import com.arquitectura.logicaUsuarios.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class ChatFachadaImpl implements IChatFachada {
@@ -89,7 +85,9 @@ public class ChatFachadaImpl implements IChatFachada {
     public List<MessageResponseDto> obtenerMensajesDeCanal(int canalId) {
         return messageService.obtenerMensajesPorCanal(canalId);
     }
-    
 
-
+    @Override
+    public void enviarMensajeBroadcast(String contenido, int adminId) throws Exception {
+        messageService.enviarMensajeBroadcast(contenido, adminId);
+    }
 }

@@ -23,7 +23,6 @@
         <module>server-app</module>
         <module>Server-DTO</module>
         <module>server-logic-mail</module>
-        <module>server-LogicaCanales</module>
     </modules>
 
     <properties>

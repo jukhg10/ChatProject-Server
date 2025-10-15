@@ -1,4 +1,4 @@
-package com.arquitectura.logica;
+package com.arquitectura.logicaUsuarios;
 
 import com.arquitectura.DTO.usuarios.LoginRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;

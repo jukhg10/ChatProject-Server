@@ -1,4 +1,4 @@
-package com.arquitectura.logica.eventos;
+package com.arquitectura.logicaMensajes.eventos;
 
 import org.springframework.context.ApplicationEvent;
 

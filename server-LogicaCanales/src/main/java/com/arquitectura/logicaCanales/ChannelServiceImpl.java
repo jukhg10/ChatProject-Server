@@ -1,4 +1,4 @@
-package com.arquitectura.logica;
+package com.arquitectura.logicaCanales;
 
 import com.arquitectura.DTO.canales.ChannelResponseDto;
 import com.arquitectura.DTO.canales.CreateChannelRequestDto; // <-- IMPORT AÑADIDO

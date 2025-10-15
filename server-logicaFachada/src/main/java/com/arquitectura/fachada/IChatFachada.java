@@ -28,6 +28,7 @@ public interface IChatFachada {
 
     // --- MÉTODOS DE MENSAJE (ACTUALIZADOS) ---
     // Se reemplazan los dos métodos anteriores por uno solo que usa DTO
+    void enviarMensajeBroadcast(String contenido, int adminId) throws Exception;
     MessageResponseDto enviarMensajeTexto(SendMessageRequestDto requestDto, int autorId) throws Exception;
     MessageResponseDto enviarMensajeAudio(SendMessageRequestDto requestDto, int autorId) throws Exception;
     List<MessageResponseDto> obtenerMensajesDeCanal(int canalId);

@@ -32,5 +32,10 @@
             <artifactId>Server-DTO</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version> </dependency>
         </dependencies>
+
 </project>

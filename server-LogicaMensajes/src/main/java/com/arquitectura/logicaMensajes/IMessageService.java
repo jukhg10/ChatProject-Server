@@ -1,4 +1,4 @@
-package com.arquitectura.logica;
+package com.arquitectura.logicaMensajes;
 
 import com.arquitectura.DTO.Mensajes.MessageResponseDto;
 import com.arquitectura.DTO.Mensajes.SendMessageRequestDto; // <-- IMPORT AÑADIDO

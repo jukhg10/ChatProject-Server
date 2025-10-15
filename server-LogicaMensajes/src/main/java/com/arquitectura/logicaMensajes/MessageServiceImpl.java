@@ -1,10 +1,10 @@
-package com.arquitectura.logica;
+package com.arquitectura.logicaMensajes;
 
 import com.arquitectura.DTO.Mensajes.MessageResponseDto;
 import com.arquitectura.DTO.Mensajes.SendMessageRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.*;
-import com.arquitectura.logica.eventos.BroadcastMessageEvent;
+import com.arquitectura.logicaMensajes.eventos.BroadcastMessageEvent;
 import com.arquitectura.persistence.ChannelRepository;
 import com.arquitectura.persistence.MessageRepository;
 import com.arquitectura.persistence.UserRepository;
