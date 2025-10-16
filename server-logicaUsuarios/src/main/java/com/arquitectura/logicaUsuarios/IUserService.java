@@ -6,6 +6,7 @@ import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.User; // Se mantiene para un método interno
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IUserService {
     /**
@@ -29,7 +30,7 @@ public interface IUserService {
      * @return Una lista de DTOs de todos los usuarios.
      */
     List<UserResponseDto> obtenerTodosLosUsuarios();
-    
+    List<UserResponseDto> getUsersByIds(Set<Integer> userIds);
     /**
      * Busca una entidad de Usuario por su ID.
      * Este método es para uso interno de la capa de negocio (ej. la fachada).

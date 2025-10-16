@@ -22,7 +22,8 @@
         <module>server-vista</module>
         <module>server-app</module>
         <module>Server-DTO</module>
-        <module>server-logic-mail</module>
+        <module>server-Utils</module>
+        <module>server-events</module>
     </modules>
 
     <properties>

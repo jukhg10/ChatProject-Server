@@ -26,6 +26,11 @@
         <artifactId>server-controladorTransporte</artifactId>
         <version>${project.version}</version>
     </dependency>
+        <dependency>
+            <groupId>com.arquitectura</groupId>
+            <artifactId>server-events</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
 
     </dependencies>
 

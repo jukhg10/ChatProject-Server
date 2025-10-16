@@ -1,7 +1,7 @@
 package com.arquitectura.app;
 
 import com.arquitectura.controlador.ServerViewController;
-import com.arquitectura.mail.MailConfig;
+import com.arquitectura.utils.mail.MailConfig;
 import com.arquitectura.configdb.ConfiguracionPersistencia;
 import com.arquitectura.transporte.ServerListener;
 import com.arquitectura.vista.ServerMainWindow;

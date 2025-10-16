@@ -3,16 +3,18 @@ package com.arquitectura.DTO.usuarios;
 public class UserRegistrationRequestDto {
     private String username;
     private String email;
-    private String password; // Contraseña en texto plano
+    private String password;
+    private String photoFilePath;
 
     // Constructor vacío
     public UserRegistrationRequestDto() {}
 
     // Constructor con campos
-    public UserRegistrationRequestDto(String username, String email, String password) {
+    public UserRegistrationRequestDto(String username, String email, String password, String photoFilePath) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.photoFilePath = photoFilePath;
     }
 
     // Getters y Setters
@@ -22,4 +24,10 @@ public class UserRegistrationRequestDto {
     public void setEmail(String email) { this.email = email; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    public String getPhotoFilePath() {
+        return photoFilePath;
+    }
+    public void setPhotoFilePath(String photoFilePath) {
+        this.photoFilePath = photoFilePath;
+    }
 }

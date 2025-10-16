@@ -5,10 +5,12 @@ import com.arquitectura.controlador.ServerViewController;
 
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 
 
 public class ServerMainWindow extends JFrame {
+
     private final ServerViewController controller;
     private JPanel mainContentPanel;
     private CardLayout cardLayout;
@@ -16,12 +18,14 @@ public class ServerMainWindow extends JFrame {
     // Paneles personalizados para cada vista
     private RegisterUserPanel registerUserPanel;
     private UsersReportPanel usersReportPanel;
+    private ChannelsReportPanel channelsReportPanel;
+    private LogsReportPanel logsReportPanel;
     // Aquí añadirías los otros paneles de informes a medida que los crees
 
     public ServerMainWindow(ServerViewController controller) {
         this.controller = controller;
         initComponents();
-        addListeners();
+        // El addListeners() ahora está dentro de createButtonPanel para mayor claridad
     }
 
     private void initComponents() {
@@ -29,11 +33,12 @@ public class ServerMainWindow extends JFrame {
         setSize(900, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(0, 0)); // Quitamos el gap para que el borde funcione bien
 
-        // --- Panel Izquierdo ---
+        // --- Panel Izquierdo (Botones) ---
         JPanel buttonPanel = createButtonPanel();
         add(buttonPanel, BorderLayout.WEST);
+
 
         // --- Panel Derecho (Contenido Principal) ---
         cardLayout = new CardLayout();
@@ -43,12 +48,14 @@ public class ServerMainWindow extends JFrame {
         // Creamos una instancia de nuestros paneles personalizados
         registerUserPanel = new RegisterUserPanel(controller);
         usersReportPanel = new UsersReportPanel(controller);
-        // Aquí instanciarías los otros paneles
+        channelsReportPanel = new ChannelsReportPanel(controller);
+        logsReportPanel = new LogsReportPanel(controller);
 
         // Añadimos los paneles al CardLayout con un nombre único
         mainContentPanel.add(registerUserPanel, "REGISTER_USER_PANEL");
         mainContentPanel.add(usersReportPanel, "USERS_REPORT_PANEL");
-        // ... Añadir otros paneles aquí
+        mainContentPanel.add(channelsReportPanel, "CHANNELS_REPORT_PANEL");
+        mainContentPanel.add(logsReportPanel, "LOGS_REPORT_PANEL");
 
         add(mainContentPanel, BorderLayout.CENTER);
 
@@ -56,21 +63,65 @@ public class ServerMainWindow extends JFrame {
         cardLayout.show(mainContentPanel, "REGISTER_USER_PANEL");
     }
 
-    // Método para crear el panel de botones y mantener initComponents más limpio
+    // MÉTODO MODIFICADO CON LOS CAMBIOS DE ESTILO
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Creas todos tus botones aquí
+        // --- 1. FONDO MORADO OSCURO ---
+        panel.setBackground(new Color(48, 25, 52)); // RGB para un morado oscuro
+
+        // --- 2. LÍNEA SEPARADORA ---
+        Border lineBorder = BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY);
+        Border paddingBorder = BorderFactory.createEmptyBorder(10, 10, 10, 10);
+        panel.setBorder(BorderFactory.createCompoundBorder(lineBorder, paddingBorder));
+
+        // Título "Acciones" con color blanco para que sea legible
+        JLabel title = new JLabel("Acciones");
+        title.setForeground(Color.WHITE);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+        title.setAlignmentX(Component.LEFT_ALIGNMENT); // Alinear a la izquierda
+        panel.add(title);
+        panel.add(Box.createRigidArea(new Dimension(0, 20))); // Espacio más grande
+
+        // todos los botones aquí
         JButton btnShowRegister = new JButton("Registrar Usuario");
         JButton btnShowRegisteredUsers = new JButton("Usuarios Registrados");
-        // ... otros botones
+        JButton btnChannelsWithUsers = new JButton("Canales con usuarios");
+        JButton btnLogs = new JButton("Logs");
+        // ... otros botones ...
 
-        panel.add(btnShowRegister);
-        panel.add(Box.createRigidArea(new Dimension(0, 5)));
-        panel.add(btnShowRegisteredUsers);
-        // ... añadir otros botones
+        // Guardamos los botones en un array para manipularlos fácilmente
+        JButton[] buttons = {
+                btnShowRegister,
+                btnShowRegisteredUsers,
+                btnChannelsWithUsers,
+                btnLogs
+                // ... añade los otros botones aquí
+        };
+
+        int maxWidth = 0;
+
+        for (JButton btn : buttons) {
+            panel.add(btn);
+            panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espacio entre botones
+
+            // Cambiamos el color del texto para que se vea bien
+            btn.setForeground(Color.WHITE);
+            btn.setBackground(new Color(80, 60, 85)); // Un morado un poco más claro
+            btn.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            // Calculamos el ancho preferido más grande
+            if (btn.getPreferredSize().width > maxWidth) {
+                maxWidth = btn.getPreferredSize().width;
+            }
+        }
+
+        // --- 3. BOTONES GRANDES Y DEL MISMO TAMAÑO ---
+        Dimension buttonSize = new Dimension(maxWidth + 20, 40); // Ancho máximo + padding, y 40 de alto
+        for (JButton btn : buttons) {
+            btn.setMaximumSize(buttonSize);
+        }
 
         // Asignamos los listeners aquí mismo
         btnShowRegister.addActionListener(e -> cardLayout.show(mainContentPanel, "REGISTER_USER_PANEL"));
@@ -80,12 +131,17 @@ public class ServerMainWindow extends JFrame {
             cardLayout.show(mainContentPanel, "USERS_REPORT_PANEL");
         });
 
-        return panel;
-    }
+        btnChannelsWithUsers.addActionListener(e -> {
+            channelsReportPanel.refreshReport(); // Carga o refresca los datos del nuevo informe
+            cardLayout.show(mainContentPanel, "CHANNELS_REPORT_PANEL");
+        });
+        btnLogs.addActionListener(e -> {
+            logsReportPanel.refreshReport(true); // Carga y mueve el scroll al inicio
+            logsReportPanel.startAutoRefresh(); // Inicia el auto-refresco al entrar
+            cardLayout.show(mainContentPanel, "LOGS_REPORT_PANEL");
+        });
 
-    private void addListeners() {
-        // El trabajo de los listeners ahora se puede hacer en createButtonPanel
-        // para tener la lógica más localizada.
+        return panel;
     }
 
     public void display() {

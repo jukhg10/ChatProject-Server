@@ -11,14 +11,17 @@ import com.arquitectura.domain.MembresiaCanalId;
 import com.arquitectura.domain.User;
 import com.arquitectura.domain.enums.EstadoMembresia;
 import com.arquitectura.domain.enums.TipoCanal; // <-- IMPORT AÑADIDO
+import com.arquitectura.events.UserInvitedEvent;
 import com.arquitectura.persistence.ChannelRepository;
 import com.arquitectura.persistence.MembresiaCanalRepository;
 import com.arquitectura.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,12 +31,15 @@ public class ChannelServiceImpl implements IChannelService {
     private final ChannelRepository channelRepository;
     private final UserRepository userRepository;
     private final MembresiaCanalRepository membresiaCanalRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Autowired
-    public ChannelServiceImpl(ChannelRepository channelRepository, UserRepository userRepository, MembresiaCanalRepository membresiaCanalRepository) {
+    public ChannelServiceImpl(ChannelRepository channelRepository, UserRepository userRepository, MembresiaCanalRepository membresiaCanalRepository, ApplicationEventPublisher eventPublisher) {
         this.channelRepository = channelRepository;
         this.userRepository = userRepository;
         this.membresiaCanalRepository = membresiaCanalRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -118,8 +124,10 @@ public class ChannelServiceImpl implements IChannelService {
 
         MembresiaCanal nuevaInvitacion = new MembresiaCanal(membresiaId, userToInvite, channel, EstadoMembresia.PENDIENTE);
         membresiaCanalRepository.save(nuevaInvitacion);
-    }
 
+        ChannelResponseDto channelDto = mapToChannelResponseDto(channel);
+        eventPublisher.publishEvent(new UserInvitedEvent(this, userToInvite.getUserId(), channelDto));
+    }
     @Override
     @Transactional
     public void responderInvitacion(RespondToInviteRequestDto requestDto, int userId) throws Exception {
@@ -140,6 +148,44 @@ public class ChannelServiceImpl implements IChannelService {
 
         }
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<ChannelResponseDto> getPendingInvitationsForUser(int userId) {
+        // Este método requerirá añadir uno nuevo al repositorio
+        return membresiaCanalRepository.findAllByUsuarioUserIdAndEstado(userId, EstadoMembresia.PENDIENTE)
+                .stream()
+                .map(MembresiaCanal::getCanal)
+                .map(this::mapToChannelResponseDto)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<ChannelResponseDto, List<UserResponseDto>> obtenerCanalesConMiembros() {
+        List<Channel> canales = channelRepository.findAll();
+
+        return canales.stream()
+                .collect(Collectors.toMap(
+                        this::mapToChannelResponseDto, // La clave del mapa es el DTO del canal
+                        canal -> canal.getMembresias().stream()
+                                // Filtramos solo los miembros que están activos en el canal
+                                .filter(membresia -> membresia.getEstado() == EstadoMembresia.ACTIVO)
+                                // Mapeamos la entidad User a su DTO
+                                .map(membresia -> mapToUserResponseDto(membresia.getUsuario()))
+                                .collect(Collectors.toList()) // El valor del mapa es la lista de DTOs de usuario
+                ));
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<ChannelResponseDto> obtenerCanalesPorUsuario(int userId) {
+        // Necesitaremos un nuevo método en el MembresiaCanalRepository
+        return membresiaCanalRepository.findAllByUsuarioUserIdAndEstado(userId, EstadoMembresia.ACTIVO)
+                .stream()
+                .map(MembresiaCanal::getCanal) // De cada membresía, obtenemos el canal
+                .map(this::mapToChannelResponseDto) // Convertimos la entidad a DTO
+                .collect(Collectors.toList());
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -149,18 +195,6 @@ public class ChannelServiceImpl implements IChannelService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<ChannelResponseDto> findById(int channelId) {
-        return channelRepository.findById(channelId)
-                .map(this::mapToChannelResponseDto);
-    }
-
-    /**
-     * Mapea una entidad Channel a su correspondiente ChannelResponseDto.
-     * @param channel La entidad a convertir.
-     * @return El DTO con la información pública.
-     */
     private ChannelResponseDto mapToChannelResponseDto(Channel channel) {
         // Mapea el propietario a su DTO
         UserResponseDto ownerDto = new UserResponseDto(
@@ -178,10 +212,18 @@ public class ChannelServiceImpl implements IChannelService {
                 ownerDto
         );
     }
-
+    private UserResponseDto mapToUserResponseDto(User user) {
+        return new UserResponseDto(
+                user.getUserId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPhotoAddress()
+        );
+    }
     private void anadirMiembroConEstado(Channel channel, User user, EstadoMembresia estado) {
         MembresiaCanalId membresiaId = new MembresiaCanalId(channel.getChannelId(), user.getUserId());
         MembresiaCanal nuevaMembresia = new MembresiaCanal(membresiaId, user, channel, estado);
         membresiaCanalRepository.save(nuevaMembresia);
     }
+
 }

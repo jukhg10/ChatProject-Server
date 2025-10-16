@@ -1,4 +1,4 @@
-package com.arquitectura.mail;
+package com.arquitectura.utils.mail;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;

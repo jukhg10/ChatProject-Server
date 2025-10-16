@@ -41,6 +41,11 @@
             <artifactId>Server-DTO</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.arquitectura</groupId>
+            <artifactId>server-Utils</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>

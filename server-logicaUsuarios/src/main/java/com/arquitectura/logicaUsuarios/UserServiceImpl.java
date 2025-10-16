@@ -4,7 +4,8 @@ import com.arquitectura.DTO.usuarios.LoginRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.User;
-import com.arquitectura.mail.EmailService;
+import com.arquitectura.utils.file.FileStorageService;
+import com.arquitectura.utils.mail.EmailService;
 import com.arquitectura.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,8 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,10 +25,12 @@ public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final FileStorageService fileStorageService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, EmailService emailService) {
+    public UserServiceImpl(UserRepository userRepository, EmailService emailService, FileStorageService fileStorageService) {
         this.userRepository = userRepository;
+        this.fileStorageService = fileStorageService;
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.emailService = emailService;
     }
@@ -38,26 +43,37 @@ public class UserServiceImpl implements IUserService {
             throw new Exception("El nombre de usuario ya está en uso.");
         }
 
+        String photoPath = null;
+        if (requestDto.getPhotoFilePath() != null && !requestDto.getPhotoFilePath().isEmpty()) {
+            File photoFile = new File(requestDto.getPhotoFilePath());
+            if (photoFile.exists()) {
+                // El nuevo nombre del archivo será el username.
+                photoPath = fileStorageService.storeFile(photoFile, requestDto.getUsername(), "user_photos");
+            }
+        }
+
         String hashedPassword = passwordEncoder.encode(requestDto.getPassword());
 
-        // Mapeo: DTO -> Entidad
         User newUserEntity = new User(
-            requestDto.getUsername(),
-            requestDto.getEmail(),
-            hashedPassword,
-            ipAddress
+                requestDto.getUsername(),
+                requestDto.getEmail(),
+                hashedPassword,
+                ipAddress
         );
 
+        // Asignamos la ruta de la foto guardada
+        newUserEntity.setPhotoAddress(photoPath);
+
         User savedUser = userRepository.save(newUserEntity);
-        
+
+        // ... (el resto del método no cambia)
         emailService.enviarCredenciales(savedUser.getEmail(), savedUser.getUsername(), requestDto.getPassword());
 
-        // Mapeo: Entidad -> DTO para la respuesta
         return new UserResponseDto(
-            savedUser.getUserId(),
-            savedUser.getUsername(),
-            savedUser.getEmail(),
-            savedUser.getPhotoAddress()
+                savedUser.getUserId(),
+                savedUser.getUsername(),
+                savedUser.getEmail(),
+                savedUser.getPhotoAddress()
         );
     }
     @Override
@@ -82,6 +98,17 @@ public class UserServiceImpl implements IUserService {
                 user.getEmail(),
                 user.getPhotoAddress()
         );
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> getUsersByIds(Set<Integer> userIds) {
+        return userRepository.findAllById(userIds).stream()
+                .map(user -> new UserResponseDto(
+                        user.getUserId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getPhotoAddress()))
+                .collect(Collectors.toList());
     }
 
     // Devuelve una lista de DTOs

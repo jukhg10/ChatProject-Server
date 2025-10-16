@@ -3,8 +3,9 @@ package com.arquitectura.controlador;
 import com.arquitectura.DTO.Mensajes.SendMessageRequestDto;
 import com.arquitectura.DTO.canales.ChannelResponseDto;
 import com.arquitectura.DTO.canales.CreateChannelRequestDto;
+import com.arquitectura.DTO.canales.InviteMemberRequestDto;
+import com.arquitectura.DTO.canales.RespondToInviteRequestDto;
 import com.arquitectura.DTO.usuarios.LoginRequestDto;
-import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto; // <-- IMPORT AÑADIDO
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.fachada.IChatFachada;
 import com.google.gson.Gson;
@@ -17,6 +18,7 @@ import java.util.List;
 public class RequestDispatcher {
 
     private final IChatFachada chatFachada;
+    private Gson gson =new Gson() ;
     private UserResponseDto authenticatedUser = null;
 
     @Autowired
@@ -47,34 +49,21 @@ public class RequestDispatcher {
                                     credentials[1]  // password
                             );
                             String ipAddress = handler.getClientIpAddress();
-
-                            // 2. Llamar a la fachada con el DTO
                             UserResponseDto userDto = chatFachada.autenticarUsuario(loginDto, ipAddress);
-
-                            // 3. Marcar el handler como autenticado
                             handler.setAuthenticatedUser(userDto);
-
-                            // 4. Enviar respuesta de éxito al cliente
-                            // Es útil devolver el ID y el username para que el cliente los guarde
                             handler.sendMessage("OK;LOGIN_SUCCESS;" + userDto.getUserId() + ";" + userDto.getUsername());
                         }
                     }
                     break;
                 case "LOGOUT":
-                    // Opcional: Podrías notificar a otros usuarios que este se ha desconectado.
-                    // Por ahora, solo limpiamos el estado del servidor.
-
                     String username = handler.getAuthenticatedUser().getUsername();
-                    handler.clearAuthenticatedUser(); // "Olvida" quién era en esta conexión.
-
+                    handler.clearAuthenticatedUser();
                     handler.sendMessage("OK;LOGOUT;Sesión de " + username + " cerrada.");
                     break;
                 case "OBTENER_USUARIOS":
                     // 1. Llamar a la fachada para obtener la lista de DTOs de usuario
                     List<UserResponseDto> usuarios = chatFachada.obtenerTodosLosUsuarios();
-                    Gson gson = new Gson();
                     String jsonUsuarios = gson.toJson(usuarios);
-
                     // 3. Enviar la lista al cliente
                     handler.sendMessage("OK;OBTENER_USUARIOS;" + jsonUsuarios);
                     break;
@@ -82,21 +71,42 @@ public class RequestDispatcher {
                 case "CREAR_CANAL_GRUPO":
                     if (parts.length == 2) {
                         String channelName = parts[1];
-
-                        // 1. Obtener el ID del creador desde la sesión del handler
+                        //  Obtener el ID del creador desde la sesión del handler
                         int ownerId = handler.getAuthenticatedUser().getUserId();
-
-                        // 2. Crear el DTO de la petición
                         CreateChannelRequestDto createDto = new CreateChannelRequestDto(channelName, "GRUPO");
-
-                        // 3. Llamar a la fachada
                         ChannelResponseDto channelDto = chatFachada.crearCanal(createDto, ownerId);
-
-                        // 4. Enviar una respuesta de éxito al cliente con los datos del nuevo canal
+                        // Enviar una respuesta de éxito al cliente con los datos del nuevo canal
                         handler.sendMessage("OK;CREAR_CANAL_GRUPO;" + channelDto.getChannelId() + ";" + channelDto.getChannelName());
                     } else {
                         handler.sendMessage("ERROR;CREAR_CANAL_GRUPO;Formato incorrecto. Se esperaba: CREAR_CANAL_GRUPO;nombre_canal");
                     }
+                    break;
+                case "CREAR_CANAL_DIRECTO":
+                    if (parts.length == 2) {
+                        // 1. Obtener el ID del otro usuario desde el comando
+                        int otherUserId = Integer.parseInt(parts[1]);
+                        // 2. Obtener el ID del usuario actual desde la sesión
+                        int currentUserId = handler.getAuthenticatedUser().getUserId();
+                        // 3. Llamar a la fachada para crear el canal directo
+                        ChannelResponseDto directChannelDto = chatFachada.crearCanalDirecto(currentUserId, otherUserId);
+                        // 4. Enviar la respuesta de éxito al cliente
+                        handler.sendMessage("OK;CREAR_CANAL_DIRECTO;" + directChannelDto.getChannelId() + ";" + directChannelDto.getChannelName());
+                    } else {
+                        handler.sendMessage("ERROR;CREAR_CANAL_DIRECTO;Formato incorrecto. Se esperaba: CREAR_CANAL_DIRECTO;id_otro_usuario");
+                    }
+                    break;
+                case "OBTENER_MIS_CANALES":
+                    // 1. Obtener el ID del usuario que hace la petición desde su sesión.
+                    int userId = handler.getAuthenticatedUser().getUserId();
+
+                    // 2. Llamar a la fachada para obtener la lista de sus canales.
+                    List<ChannelResponseDto> misCanales = chatFachada.obtenerCanalesPorUsuario(userId);
+
+                    // 3. Convertir la lista de objetos DTO a una cadena JSON para el transporte.
+                    String jsonCanales = gson.toJson(misCanales);
+
+                    // 4. Enviar la respuesta al cliente.
+                    handler.sendMessage("OK;OBTENER_MIS_CANALES;" + jsonCanales);
                     break;
 
                 case "ENVIAR_MENSAJE_TEXTO":
@@ -113,6 +123,40 @@ public class RequestDispatcher {
                         chatFachada.enviarMensajeTexto(messageDto, autorId);
 
                         handler.sendMessage("OK;ENVIAR_MENSAJE_TEXTO;Mensaje enviado.");
+                    }
+                    break;
+                case "INVITAR_USUARIO":
+                    if (parts.length == 2) {
+                        String[] params = parts[1].split(";", 2);
+                        int channelId = Integer.parseInt(params[0]);
+                        int userIdToInvite = Integer.parseInt(params[1]);
+                        int ownerId = handler.getAuthenticatedUser().getUserId();
+
+                        InviteMemberRequestDto inviteDto = new InviteMemberRequestDto(channelId, userIdToInvite);
+                        chatFachada.invitarMiembro(inviteDto, ownerId);
+
+                        handler.sendMessage("OK;INVITAR_USUARIO;Invitación enviada.");
+                    }
+                    break;
+
+                case "OBTENER_MIS_INVITACIONES":
+                    int userIdInvitacion = handler.getAuthenticatedUser().getUserId();
+                    List<ChannelResponseDto> invitaciones = chatFachada.getPendingInvitationsForUser(userIdInvitacion);
+                    String jsonInvitaciones = gson.toJson(invitaciones);
+                    handler.sendMessage("OK;OBTENER_MIS_INVITACIONES;" + jsonInvitaciones);
+                    break;
+
+                case "RESPONDER_INVITACION":
+                    if (parts.length == 2) {
+                        String[] params = parts[1].split(";", 2);
+                        int channelId = Integer.parseInt(params[0]);
+                        boolean accepted = params[1].equalsIgnoreCase("ACEPTAR");
+                        int currentUserId = handler.getAuthenticatedUser().getUserId();
+
+                        RespondToInviteRequestDto responseDto = new RespondToInviteRequestDto(channelId, accepted);
+                        chatFachada.responderInvitacion(responseDto, currentUserId);
+
+                        handler.sendMessage("OK;RESPONDER_INVITACION;Respuesta procesada.");
                     }
                     break;
 

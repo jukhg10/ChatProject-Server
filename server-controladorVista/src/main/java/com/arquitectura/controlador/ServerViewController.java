@@ -1,11 +1,14 @@
 package com.arquitectura.controlador;
 
+import com.arquitectura.DTO.Mensajes.TranscriptionResponseDto;
 import com.arquitectura.DTO.canales.ChannelResponseDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.fachada.IChatFachada;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -38,36 +41,28 @@ public class ServerViewController {
         // La IP para un registro desde el servidor puede ser "localhost"
         chatFachada.registrarUsuario(requestDto, "127.0.0.1");
     }
-    // --- NUEVOS MÉTODOS PARA LOS INFORMES ---
+    // MÉTODOS PARA LOS INFORMES
 
-    /**
-     * NOTA: Este método requiere crear primero la lógica en el backend (Servicio y Fachada).
-     * Devolverá un mapa donde la clave es el canal y el valor es la lista de sus miembros.
-     */
     public Map<ChannelResponseDto, List<UserResponseDto>> obtenerCanalesConMiembros() {
-        // return chatFachada.obtenerCanalesConMiembros(); // Descomentar cuando la fachada lo tenga
-        System.out.println("Lógica de backend para 'obtenerCanalesConMiembros' no implementada.");
-        return null; // Valor temporal
+        return chatFachada.obtenerCanalesConMiembros();
+    }
+    public String getLogContents() {
+        try {
+            return chatFachada.getLogContents();
+        } catch (IOException e) {
+            return "Error al acceder a los logs: " + e.getMessage();
+        }
+    }
+    public List<TranscriptionResponseDto> obtenerTranscripciones() {
+        return chatFachada.obtenerTranscripciones();
     }
 
-    /**
-     * NOTA: Este método requiere crear primero la lógica en el backend.
-     * Devolverá la lista de usuarios actualmente conectados.
-     */
     public List<UserResponseDto> obtenerUsuariosConectados() {
         // return chatFachada.obtenerUsuariosConectados(); // Descomentar cuando la fachada lo tenga
         System.out.println("Lógica de backend para 'obtenerUsuariosConectados' no implementada.");
         return null; // Valor temporal
     }
 
-    /**
-     * NOTA: Este método requiere crear primero la lógica en el backend.
-     * Devolverá las transcripciones de los mensajes de audio.
-     */
-    public List<String> obtenerTranscripciones() {
-        // return chatFachada.obtenerTranscripciones(); // Descomentar cuando la fachada lo tenga
-        System.out.println("Lógica de backend para 'obtenerTranscripciones' no implementada.");
-        return null; // Valor temporal
-    }
+
 
 }
