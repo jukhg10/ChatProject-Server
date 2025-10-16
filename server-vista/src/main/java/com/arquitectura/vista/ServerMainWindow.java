@@ -51,7 +51,7 @@ public class ServerMainWindow extends JFrame {
         usersReportPanel = new UsersReportPanel(controller);
         channelsReportPanel = new ChannelsReportPanel(controller);
         logsReportPanel = new LogsReportPanel(controller);
-        connectedUsersReportPanel = new ConnectedUsersReportPanel(controller);
+//        connectedUsersReportPanel = new ConnectedUsersReportPanel(controller);
         transcriptionsReportPanel = new TranscriptionsReportPanel(controller);
         broadcastMessagePanel = new BroadcastMessagePanel(controller);
 
@@ -60,7 +60,7 @@ public class ServerMainWindow extends JFrame {
         mainContentPanel.add(usersReportPanel, "USERS_REPORT_PANEL");
         mainContentPanel.add(channelsReportPanel, "CHANNELS_REPORT_PANEL");
         mainContentPanel.add(logsReportPanel, "LOGS_REPORT_PANEL");
-        mainContentPanel.add(connectedUsersReportPanel, "CONNECTED_USERS_PANEL");
+//        mainContentPanel.add(connectedUsersReportPanel, "CONNECTED_USERS_PANEL");
         mainContentPanel.add(transcriptionsReportPanel, "TRANSCRIPTIONS_PANEL");
         mainContentPanel.add(broadcastMessagePanel, "BROADCAST_PANEL");
 
