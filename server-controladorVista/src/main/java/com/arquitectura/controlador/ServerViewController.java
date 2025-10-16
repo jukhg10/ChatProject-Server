@@ -61,11 +61,6 @@ public class ServerViewController {
         return chatFachada.obtenerTranscripciones();
     }
 
-    public List<UserResponseDto> obtenerUsuariosConectados() {
-        // return chatFachada.obtenerUsuariosConectados(); // Descomentar cuando la fachada lo tenga
-        System.out.println("Lógica de backend para 'obtenerUsuariosConectados' no implementada.");
-        return null; // Valor temporal
-    }
     public void disconnectUser(int userId) {
         eventPublisher.publishEvent(new ForceDisconnectEvent(this, userId));
     }

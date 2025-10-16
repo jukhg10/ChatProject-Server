@@ -134,7 +134,7 @@ public class ServerListener {
         if (userSessions != null && !userSessions.isEmpty()) {
             log.info("Administrador forzando desconexión para el usuario ID: {}", userId);
             List<IClientHandler> sessionsToClose = new ArrayList<>(userSessions);
-            sessionsToClose.forEach(IClientHandler::forceDisconnect);
+            sessionsToClose.forEach(IClientHandler::forceDisconnect); // Llama al método final
         } else {
             log.warn("Se intentó desconectar al usuario ID: {}, pero no se encontraron sesiones activas.", userId);
         }

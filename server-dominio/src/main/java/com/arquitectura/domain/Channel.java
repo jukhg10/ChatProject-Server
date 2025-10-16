@@ -41,6 +41,10 @@ public class Channel {
         this.membresias = new HashSet<>();
     }
 
+    public Channel() {
+
+    }
+
     // --- Getters y Setters ---
 
     public TipoCanal getTipo() {
