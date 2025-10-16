@@ -7,9 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 
 @Service
-public class FileStorageService {
+public class FileStorageService implements  IFileStorageService{
     private final Path rootStorageLocation;
 
     public FileStorageService() {
@@ -55,5 +56,20 @@ public class FileStorageService {
         // 5. Devolver la ruta relativa (incluyendo el subdirectorio) para guardarla en la BD
         // Esto devolverá algo como "user_photos/juan.jpg" o "audio_files/12345.wav"
         return Paths.get(subDirectory).resolve(finalFileName).toString();
+    }
+    @Override
+    public String readFileAsBase64(String relativePath) throws IOException {
+        // Resuelve la ruta completa del archivo en el servidor
+        Path filePath = this.rootStorageLocation.resolve(relativePath).normalize();
+
+        if (!Files.exists(filePath)) {
+            throw new IOException("Archivo no encontrado: " + relativePath);
+        }
+
+        // Lee todos los bytes del archivo
+        byte[] fileBytes = Files.readAllBytes(filePath);
+
+        // Codifica los bytes en una cadena Base64 y la devuelve
+        return Base64.getEncoder().encodeToString(fileBytes);
     }
 }

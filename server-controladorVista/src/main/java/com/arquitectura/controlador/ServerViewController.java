@@ -4,8 +4,10 @@ import com.arquitectura.DTO.Mensajes.TranscriptionResponseDto;
 import com.arquitectura.DTO.canales.ChannelResponseDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
+import com.arquitectura.events.ForceDisconnectEvent;
 import com.arquitectura.fachada.IChatFachada;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Controller;
 
 import java.io.IOException;
@@ -16,10 +18,12 @@ import java.util.Map;
 public class ServerViewController {
 
     private final IChatFachada chatFachada;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public ServerViewController(IChatFachada chatFachada) {
+    public ServerViewController(IChatFachada chatFachada, ApplicationEventPublisher eventPublisher) {
         this.chatFachada = chatFachada;
+        this.eventPublisher = eventPublisher;
     }
 
     // metodos registro y mensaje
@@ -61,6 +65,9 @@ public class ServerViewController {
         // return chatFachada.obtenerUsuariosConectados(); // Descomentar cuando la fachada lo tenga
         System.out.println("Lógica de backend para 'obtenerUsuariosConectados' no implementada.");
         return null; // Valor temporal
+    }
+    public void disconnectUser(int userId) {
+        eventPublisher.publishEvent(new ForceDisconnectEvent(this, userId));
     }
 
 

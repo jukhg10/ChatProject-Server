@@ -159,6 +159,33 @@ public class RequestDispatcher {
                         handler.sendMessage("OK;RESPONDER_INVITACION;Respuesta procesada.");
                     }
                     break;
+                case "DESCARGAR_ARCHIVO":
+                    if (parts.length == 2) {
+                        String relativePath = parts[1];
+
+                        // Llamamos a la fachada para obtener el archivo codificado
+                        String base64Content = chatFachada.getFileAsBase64(relativePath);
+
+                        // Enviamos la respuesta al cliente
+                        handler.sendMessage("OK;DESCARGAR_ARCHIVO;" + relativePath + ";" + base64Content);
+                    }
+                    break;
+                case "ENVIAR_MENSAJE_AUDIO":
+                    String[] audioParts = parts[1].split(";", 2);
+                    if (audioParts.length == 2) {
+                        int channelId = Integer.parseInt(audioParts[0]);
+                        // El cliente debe enviar la ruta del archivo de audio que subió
+                        String filePath = audioParts[1];
+
+                        int autorId = handler.getAuthenticatedUser().getUserId();
+
+                        // El DTO ahora contendrá la ruta al archivo que el cliente subió a una carpeta temporal
+                        SendMessageRequestDto messageDto = new SendMessageRequestDto(channelId, "AUDIO", filePath);
+                        chatFachada.enviarMensajeAudio(messageDto, autorId);
+
+                        handler.sendMessage("OK;ENVIAR_MENSAJE_AUDIO;Mensaje de audio recibido.");
+                    }
+                    break;
 
 
                 // Aquí irían los otros casos para "SEND_MESSAGE", etc.

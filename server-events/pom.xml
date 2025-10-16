@@ -26,6 +26,7 @@
             <artifactId>Server-DTO</artifactId>
             <version>${project.version}</version>
         </dependency>
+
     </dependencies>
 
 </project>

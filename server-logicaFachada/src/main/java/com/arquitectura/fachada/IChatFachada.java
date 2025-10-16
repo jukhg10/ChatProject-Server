@@ -4,7 +4,7 @@ import com.arquitectura.DTO.Mensajes.MessageResponseDto;
 import com.arquitectura.DTO.Mensajes.TranscriptionResponseDto;
 import com.arquitectura.DTO.canales.ChannelResponseDto;
 import com.arquitectura.DTO.canales.CreateChannelRequestDto;
-import com.arquitectura.DTO.Mensajes.SendMessageRequestDto; // <-- IMPORT AÑADIDO
+import com.arquitectura.DTO.Mensajes.SendMessageRequestDto;
 import com.arquitectura.DTO.canales.InviteMemberRequestDto;
 import com.arquitectura.DTO.canales.RespondToInviteRequestDto;
 import com.arquitectura.DTO.usuarios.LoginRequestDto;
@@ -46,6 +46,8 @@ public interface IChatFachada {
     List<MessageResponseDto> obtenerMensajesDeCanal(int canalId);
     List<TranscriptionResponseDto> obtenerTranscripciones();
 
+    //Metodos de Utils
+    String getFileAsBase64(String relativePath)throws IOException;
 
     // --- MÉTODOS PARA INFORMES ---
     String getLogContents() throws IOException;

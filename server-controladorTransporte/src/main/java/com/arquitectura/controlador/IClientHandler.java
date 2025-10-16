@@ -9,4 +9,5 @@ public interface IClientHandler {
     UserResponseDto getAuthenticatedUser();
     boolean isAuthenticated();
     void clearAuthenticatedUser();
+    void forceDisconnect();
 }

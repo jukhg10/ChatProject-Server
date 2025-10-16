@@ -12,7 +12,9 @@ import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.logicaCanales.IChannelService;
 import com.arquitectura.logicaMensajes.IMessageService;
+import com.arquitectura.logicaMensajes.transcripcionAudio.IAudioTranscriptionService;
 import com.arquitectura.logicaUsuarios.IUserService;
+import com.arquitectura.utils.file.IFileStorageService;
 import com.arquitectura.utils.logs.ILogService;
 import com.arquitectura.utils.logs.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class ChatFachadaImpl implements IChatFachada {
@@ -29,13 +32,18 @@ public class ChatFachadaImpl implements IChatFachada {
     private final IUserService userService;
     private final IChannelService channelService;
     private final IMessageService messageService;
+    private final IAudioTranscriptionService transcriptionService;
+    private final IFileStorageService fileStorageService;
+
     private final ILogService logService ;
 
     @Autowired
-    public ChatFachadaImpl(IUserService userService, IChannelService channelService, IMessageService messageService, ILogService logService) {
+    public ChatFachadaImpl(IUserService userService, IChannelService channelService, IMessageService messageService, IAudioTranscriptionService transcriptionService, IFileStorageService fileStorageService, ILogService logService) {
         this.userService = userService;
         this.channelService = channelService;
         this.messageService = messageService;
+        this.transcriptionService = transcriptionService;
+        this.fileStorageService = fileStorageService;
         this.logService = logService;
     }
 
@@ -59,7 +67,10 @@ public class ChatFachadaImpl implements IChatFachada {
     public UserResponseDto autenticarUsuario(LoginRequestDto requestDto, String ipAddress) throws Exception {
         return userService.autenticarUsuario(requestDto, ipAddress);
     }
-
+    @Override
+    public List<UserResponseDto> getUsersByIds(Set<Integer> userIds) {
+        return userService.getUsersByIds(userIds);
+    }
 
     // --- MÉTODOS DE Canales ---
     @Override
@@ -126,6 +137,15 @@ public class ChatFachadaImpl implements IChatFachada {
     @Override
     public List<TranscriptionResponseDto> obtenerTranscripciones() {
         return transcriptionService.getAllTranscriptions();
+    }
+
+    @Override
+    public String getFileAsBase64(String relativePath) {
+        try {
+            return fileStorageService.readFileAsBase64(relativePath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // --- MÉTODOS PARA INFORMES ---

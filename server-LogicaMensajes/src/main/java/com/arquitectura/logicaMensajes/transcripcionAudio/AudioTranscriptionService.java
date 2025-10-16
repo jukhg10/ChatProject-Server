@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class AudioTranscriptionService {
+public class AudioTranscriptionService implements IAudioTranscriptionService {
 
     private static final String VOSK_MODEL_PATH = "vosk-model-small-es-0.42";
 
@@ -81,6 +81,7 @@ public class AudioTranscriptionService {
             System.err.println("Error durante la transcripción con Vosk: " + e.getMessage());
         }
     }
+    @Override
     @Transactional(readOnly = true)
     public List<TranscriptionResponseDto> getAllTranscriptions() {
         return transcripcionRepository.findAll().stream()

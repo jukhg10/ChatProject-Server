@@ -49,6 +49,20 @@ public class ClientHandler implements Runnable, IClientHandler {
             }
         }
     }
+    @Override
+    public void forceDisconnect() {
+        try {
+            // Cierra el socket. Esto causará una SocketException en el hilo
+            // que está leyendo (en el método run()), lo que terminará el bucle
+            // y limpiará la conexión de forma natural.
+            if (clientSocket != null && !clientSocket.isClosed()) {
+                clientSocket.close();
+            }
+        } catch (IOException e) {
+            // Usar el logger que deberíamos tener aquí
+            System.err.println("Error al forzar la desconexión: " + e.getMessage());
+        }
+    }
 
     @Override
     public void sendMessage(String message) {

@@ -2,8 +2,6 @@ package com.arquitectura.vista;
 
 
 import com.arquitectura.controlador.ServerViewController;
-
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
@@ -20,6 +18,9 @@ public class ServerMainWindow extends JFrame {
     private UsersReportPanel usersReportPanel;
     private ChannelsReportPanel channelsReportPanel;
     private LogsReportPanel logsReportPanel;
+    private ConnectedUsersReportPanel connectedUsersReportPanel;
+    private TranscriptionsReportPanel transcriptionsReportPanel;
+
     // Aquí añadirías los otros paneles de informes a medida que los crees
 
     public ServerMainWindow(ServerViewController controller) {
@@ -50,16 +51,18 @@ public class ServerMainWindow extends JFrame {
         usersReportPanel = new UsersReportPanel(controller);
         channelsReportPanel = new ChannelsReportPanel(controller);
         logsReportPanel = new LogsReportPanel(controller);
+        connectedUsersReportPanel = new ConnectedUsersReportPanel(controller);
+        transcriptionsReportPanel = new TranscriptionsReportPanel(controller);
 
         // Añadimos los paneles al CardLayout con un nombre único
         mainContentPanel.add(registerUserPanel, "REGISTER_USER_PANEL");
         mainContentPanel.add(usersReportPanel, "USERS_REPORT_PANEL");
         mainContentPanel.add(channelsReportPanel, "CHANNELS_REPORT_PANEL");
         mainContentPanel.add(logsReportPanel, "LOGS_REPORT_PANEL");
+        mainContentPanel.add(connectedUsersReportPanel, "CONNECTED_USERS_PANEL");
+        mainContentPanel.add(transcriptionsReportPanel, "TRANSCRIPTIONS_PANEL");
 
         add(mainContentPanel, BorderLayout.CENTER);
-
-        // Mostramos el panel de registro por defecto
         cardLayout.show(mainContentPanel, "REGISTER_USER_PANEL");
     }
 
@@ -88,6 +91,8 @@ public class ServerMainWindow extends JFrame {
         JButton btnShowRegister = new JButton("Registrar Usuario");
         JButton btnShowRegisteredUsers = new JButton("Usuarios Registrados");
         JButton btnChannelsWithUsers = new JButton("Canales con usuarios");
+        JButton btnShowConnectedUsers = new JButton("Usuarios Conectados");
+        JButton btnShowTranscriptions = new JButton("Texto de Mensaje de audio");
         JButton btnLogs = new JButton("Logs");
         // ... otros botones ...
 
@@ -96,6 +101,8 @@ public class ServerMainWindow extends JFrame {
                 btnShowRegister,
                 btnShowRegisteredUsers,
                 btnChannelsWithUsers,
+                btnShowConnectedUsers,
+                btnShowTranscriptions,
                 btnLogs
                 // ... añade los otros botones aquí
         };
@@ -122,7 +129,6 @@ public class ServerMainWindow extends JFrame {
         for (JButton btn : buttons) {
             btn.setMaximumSize(buttonSize);
         }
-
         // Asignamos los listeners aquí mismo
         btnShowRegister.addActionListener(e -> cardLayout.show(mainContentPanel, "REGISTER_USER_PANEL"));
 
@@ -130,7 +136,17 @@ public class ServerMainWindow extends JFrame {
             usersReportPanel.refreshReport(); // Carga o refresca los datos
             cardLayout.show(mainContentPanel, "USERS_REPORT_PANEL");
         });
+        btnShowConnectedUsers.addActionListener(e -> {
+            logsReportPanel.stopAutoRefresh();
+            connectedUsersReportPanel.refreshReport();
+            cardLayout.show(mainContentPanel, "CONNECTED_USERS_PANEL");
+        });
 
+        btnShowTranscriptions.addActionListener(e -> {
+            logsReportPanel.stopAutoRefresh();
+            transcriptionsReportPanel.refreshReport();
+            cardLayout.show(mainContentPanel, "TRANSCRIPTIONS_PANEL");
+        });
         btnChannelsWithUsers.addActionListener(e -> {
             channelsReportPanel.refreshReport(); // Carga o refresca los datos del nuevo informe
             cardLayout.show(mainContentPanel, "CHANNELS_REPORT_PANEL");
