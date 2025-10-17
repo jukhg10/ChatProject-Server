@@ -153,36 +153,35 @@ public class MessageServiceImpl implements IMessageService {
         eventPublisher.publishEvent(new BroadcastMessageEvent(this, formattedMessage));
     }
     @Override
-    @Transactional(readOnly = true) // <-- Anotación crucial para la sesión
+    @Transactional(readOnly = true)
     public List<TranscriptionResponseDto> getAllTranscriptions() {
-        // 1. LA CORRECCIÓN: Llamamos a nuestro método 'findAllWithDetails()'
+        // --- ¡AQUÍ ESTÁ EL CAMBIO CLAVE Y ÚNICO! ---
+        // 1. Usamos el nuevo método que carga todos los detalles.
         List<TranscripcionAudio> transcripciones = transcripcionAudioRepository.findAllWithDetails();
 
-        // 2. El resto del código ya es seguro porque todos los datos vienen cargados
+        // 2. Ahora, mapeamos a DTOs. Esto ya no dará error porque toda la
+        //    información (mensaje, autor y canal) fue cargada en el paso anterior.
         return transcripciones.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
-    // Este es tu método de mapeo que ya está perfecto
     private TranscriptionResponseDto mapToDto(TranscripcionAudio transcripcion) {
-        Message mensaje = transcripcion.getMensaje();
         UserResponseDto authorDto = new UserResponseDto(
-                mensaje.getAuthor().getUserId(),
-                mensaje.getAuthor().getUsername(),
-                mensaje.getAuthor().getEmail(),
-                mensaje.getAuthor().getPhotoAddress()
+                transcripcion.getMensaje().getAuthor().getUserId(),
+                transcripcion.getMensaje().getAuthor().getUsername(),
+                transcripcion.getMensaje().getAuthor().getEmail(),
+                transcripcion.getMensaje().getAuthor().getPhotoAddress()
         );
 
         return new TranscriptionResponseDto(
-                mensaje.getIdMensaje(),
+                transcripcion.getId(),
                 transcripcion.getTextoTranscrito(),
                 transcripcion.getFechaProcesamiento(),
                 authorDto,
-                mensaje.getChannel().getChannelId()
+                transcripcion.getMensaje().getChannel().getChannelId()
         );
     }
-
 
 
 

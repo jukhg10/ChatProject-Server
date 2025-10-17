@@ -160,6 +160,19 @@ public class ChatFachadaImpl implements IChatFachada {
         }
     }
 
+    @Override
+    public String guardarArchivoDeAudio(String fileName, String base64Data, int autorId) throws Exception {
+        // 1. Decodificar los datos de Base64 a un array de bytes
+        byte[] audioBytes = Base64.getDecoder().decode(base64Data);
+
+        // 2. Crear un nombre de archivo único para el servidor
+        String fileExtension = fileName.substring(fileName.lastIndexOf("."));
+        String newFileName = autorId + "_" + System.currentTimeMillis() + fileExtension;
+
+        // 3. Usar el FileStorageService para guardar los bytes y devolver la ruta
+        return fileStorageService.storeFile(audioBytes, newFileName, "audio_files");
+    }
+
     // --- MÉTODOS PARA INFORMES ---
     @Override
     public String getLogContents() throws IOException {

@@ -173,19 +173,26 @@ public class RequestDispatcher {
                     }
                     break;
                 case "ENVIAR_MENSAJE_AUDIO":
-                    String[] audioParts = parts[1].split(";", 2);
-                    if (audioParts.length == 2) {
+                    // El formato del cliente ahora es: ENVIAR_MENSAJE_AUDIO;{id_canal};{nombre_archivo};{datos_en_base64}
+                    String[] audioParts = parts[1].split(";", 3);
+                    if (audioParts.length == 3) {
                         int channelId = Integer.parseInt(audioParts[0]);
-                        // El cliente debe enviar la ruta del archivo de audio que subió
-                        String filePath = audioParts[1];
-
+                        String fileName = audioParts[1];
+                        String base64Data = audioParts[2];
                         int autorId = handler.getAuthenticatedUser().getUserId();
 
-                        // El DTO ahora contendrá la ruta al archivo que el cliente subió a una carpeta temporal
-                        SendMessageRequestDto messageDto = new SendMessageRequestDto(channelId, "AUDIO", filePath);
+                        // 1. Llamamos a la fachada para que guarde el archivo y nos devuelva la ruta
+                        String savedFilePath = chatFachada.guardarArchivoDeAudio(fileName, base64Data, autorId);
+
+                        // 2. Creamos el DTO para el mensaje, usando la ruta del archivo que acabamos de guardar
+                        SendMessageRequestDto messageDto = new SendMessageRequestDto(channelId, "AUDIO", savedFilePath);
+
+                        // 3. Le decimos al servicio de mensajes que procese el mensaje con la nueva ruta
                         chatFachada.enviarMensajeAudio(messageDto, autorId);
 
                         handler.sendMessage("OK;ENVIAR_MENSAJE_AUDIO;Mensaje de audio recibido.");
+                    } else {
+                        handler.sendMessage("ERROR;ENVIAR_MENSAJE_AUDIO;Formato de payload de audio incorrecto.");
                     }
                     break;
                 case "GET_HISTORY":

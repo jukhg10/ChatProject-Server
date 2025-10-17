@@ -49,6 +49,7 @@ public interface IChatFachada {
 
     //Metodos de Utils
     String getFileAsBase64(String relativePath)throws IOException;
+    String guardarArchivoDeAudio(String fileName, String base64Data, int autorId) throws Exception;
 
     // --- MÉTODOS PARA INFORMES ---
     String getLogContents() throws IOException;

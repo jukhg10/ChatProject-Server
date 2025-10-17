@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface TranscripcionAudioRepository extends JpaRepository<TranscripcionAudio, Long> {
-    @Query("SELECT t FROM TranscripcionAudio t JOIN FETCH t.mensaje m JOIN FETCH m.author JOIN FETCH m.channel")
+    @Query("SELECT DISTINCT ta FROM TranscripcionAudio ta JOIN FETCH ta.mensaje m JOIN FETCH m.author JOIN FETCH m.channel")
     List<TranscripcionAudio> findAllWithDetails();
 }
