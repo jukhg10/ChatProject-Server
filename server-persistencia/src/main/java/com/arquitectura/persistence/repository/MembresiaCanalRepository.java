@@ -1,4 +1,4 @@
-package com.arquitectura.persistence;
+package com.arquitectura.persistence.repository;
 
 import com.arquitectura.domain.MembresiaCanal;
 import com.arquitectura.domain.MembresiaCanalId;

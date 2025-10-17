@@ -5,7 +5,7 @@ import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.AudioMessage;
 import com.arquitectura.domain.TranscripcionAudio;
 import com.arquitectura.domain.User;
-import com.arquitectura.persistence.TranscripcionAudioRepository;
+import com.arquitectura.persistence.repository.TranscripcionAudioRepository;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

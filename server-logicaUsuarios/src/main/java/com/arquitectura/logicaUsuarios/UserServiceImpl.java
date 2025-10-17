@@ -6,7 +6,7 @@ import com.arquitectura.DTO.usuarios.UserResponseDto;
 import com.arquitectura.domain.User;
 import com.arquitectura.utils.file.FileStorageService;
 import com.arquitectura.utils.mail.EmailService;
-import com.arquitectura.persistence.UserRepository;
+import com.arquitectura.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;

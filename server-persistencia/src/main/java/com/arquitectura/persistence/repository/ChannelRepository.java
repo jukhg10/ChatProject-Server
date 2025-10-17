@@ -1,4 +1,4 @@
-package com.arquitectura.persistence;
+package com.arquitectura.persistence.repository;
 
 import com.arquitectura.domain.Channel;
 import com.arquitectura.domain.enums.TipoCanal;

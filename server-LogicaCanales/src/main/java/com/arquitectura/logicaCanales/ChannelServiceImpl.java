@@ -12,9 +12,9 @@ import com.arquitectura.domain.User;
 import com.arquitectura.domain.enums.EstadoMembresia;
 import com.arquitectura.domain.enums.TipoCanal; // <-- IMPORT AÑADIDO
 import com.arquitectura.events.UserInvitedEvent;
-import com.arquitectura.persistence.ChannelRepository;
-import com.arquitectura.persistence.MembresiaCanalRepository;
-import com.arquitectura.persistence.UserRepository;
+import com.arquitectura.persistence.repository.ChannelRepository;
+import com.arquitectura.persistence.repository.MembresiaCanalRepository;
+import com.arquitectura.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -161,17 +161,20 @@ public class ChannelServiceImpl implements IChannelService {
 
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true) // La transacción empieza aquí
     public Map<ChannelResponseDto, List<UserResponseDto>> obtenerCanalesConMiembros() {
-        // Usamos el nuevo método del repositorio que carga todo de una vez.
+        // 1. Pedimos a la base de datos las entidades con toda la información.
         List<Channel> canales = channelRepository.findAllWithMembresiasAndUsuarios();
 
+        // 2. Convertimos la lista de Entidades a un Mapa de DTOs.
+        //    Como todavía estamos DENTRO del método @Transactional, la sesión
+        //    sigue abierta y podemos acceder a 'canal.getMembresias()' sin error.
         return canales.stream()
                 .collect(Collectors.toMap(
-                        this::mapToChannelResponseDto,
+                        this::mapToChannelResponseDto, // Convierte Channel a ChannelResponseDto
                         canal -> canal.getMembresias().stream()
                                 .filter(membresia -> membresia.getEstado() == EstadoMembresia.ACTIVO)
-                                .map(membresia -> mapToUserResponseDto(membresia.getUsuario()))
+                                .map(membresia -> mapToUserResponseDto(membresia.getUsuario())) // Convierte User a UserResponseDto
                                 .collect(Collectors.toList())
                 ));
     }
@@ -194,16 +197,10 @@ public class ChannelServiceImpl implements IChannelService {
                 .collect(Collectors.toList());
     }
 
-    private ChannelResponseDto mapToChannelResponseDto(Channel channel) {
-        // Mapea el propietario a su DTO
-        UserResponseDto ownerDto = new UserResponseDto(
-                channel.getOwner().getUserId(),
-                channel.getOwner().getUsername(),
-                channel.getOwner().getEmail(),
-                channel.getOwner().getPhotoAddress()
-        );
 
-        // Crea y devuelve el DTO del canal
+    private ChannelResponseDto mapToChannelResponseDto(Channel channel) {
+        UserResponseDto ownerDto = mapToUserResponseDto(channel.getOwner());
+
         return new ChannelResponseDto(
                 channel.getChannelId(),
                 channel.getName(),
