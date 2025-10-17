@@ -155,18 +155,18 @@ public class MessageServiceImpl implements IMessageService {
     @Override
     @Transactional(readOnly = true)
     public List<TranscriptionResponseDto> getAllTranscriptions() {
-        // --- ¡AQUÍ ESTÁ EL CAMBIO CLAVE Y ÚNICO! ---
-        // 1. Usamos el nuevo método que carga todos los detalles.
-        List<TranscripcionAudio> transcripciones = transcripcionAudioRepository.findAllWithDetails();
+        // --- ¡AQUÍ ESTÁ LA SIMPLIFICACIÓN! ---
+        // Volvemos a usar el método simple. Ahora funcionará porque
+        // las entidades se encargarán de cargar toda la información.
+        List<TranscripcionAudio> transcripciones = transcripcionAudioRepository.findAll();
 
-        // 2. Ahora, mapeamos a DTOs. Esto ya no dará error porque toda la
-        //    información (mensaje, autor y canal) fue cargada en el paso anterior.
         return transcripciones.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
     private TranscriptionResponseDto mapToDto(TranscripcionAudio transcripcion) {
+        // Este método ahora funcionará sin error.
         UserResponseDto authorDto = new UserResponseDto(
                 transcripcion.getMensaje().getAuthor().getUserId(),
                 transcripcion.getMensaje().getAuthor().getUsername(),

@@ -14,14 +14,16 @@ public class ClientHandler implements Runnable, IClientHandler {
 
     private final Socket clientSocket;
     private final RequestDispatcher requestDispatcher;
+    private final ServerListener serverListener;
     private PrintWriter out;
     private BufferedReader in;
     private final Consumer<ClientHandler> onDisconnect;
     private UserResponseDto authenticatedUser = null;
 
-    public ClientHandler(Socket socket, RequestDispatcher dispatcher, Consumer<ClientHandler> onDisconnect) {
+    public ClientHandler(Socket socket, RequestDispatcher dispatcher, ServerListener serverListener, Consumer<ClientHandler> onDisconnect) {
         this.clientSocket = socket;
         this.requestDispatcher = dispatcher;
+        this.serverListener = serverListener;
         this.onDisconnect = onDisconnect;
     }
 
@@ -76,6 +78,9 @@ public class ClientHandler implements Runnable, IClientHandler {
     @Override
     public void setAuthenticatedUser(UserResponseDto user) {
         this.authenticatedUser = user;
+        if (user != null) {
+            this.serverListener.registerAuthenticatedClient(this);
+        }
     }
 
     @Override

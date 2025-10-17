@@ -60,8 +60,8 @@ public class ServerListener {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-
                 int totalConnections = activeClientsById.values().stream().mapToInt(List::size).sum();
+
                 if (totalConnections >= maxConnectedUsers) {
                     log.warn("Conexión rechazada de {}. Límite de {} conexiones alcanzado.", clientSocket.getInetAddress().getHostAddress(), maxConnectedUsers);
                     try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
@@ -72,7 +72,9 @@ public class ServerListener {
                 }
 
                 log.info("Nuevo cliente conectado: {}", clientSocket.getInetAddress().getHostAddress());
-                ClientHandler clientHandler = new ClientHandler(clientSocket, requestDispatcher, this::removeClient);
+                // --- ¡LÍNEA CORREGIDA! ---
+                // Pasamos la instancia completa de 'this' (el ServerListener)
+                ClientHandler clientHandler = new ClientHandler(clientSocket, requestDispatcher, this, this::removeClient);
                 clientPool.submit(clientHandler);
             }
         } catch (IOException e) {
@@ -144,12 +146,14 @@ public class ServerListener {
     }
 
     // --- MÉTODOS PÚBLICOS PARA GESTIÓN DE SESIONES ---
-
-    public void registerAuthenticatedClient(int userId, IClientHandler handler) {
-        List<IClientHandler> userHandlers = activeClientsById.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>());
-        userHandlers.add(handler);
-        log.info("Nueva sesión registrada para usuario {}. Total de sesiones para este usuario: {}.", userId, userHandlers.size());
+    public void registerAuthenticatedClient(IClientHandler handler) {
+        if (handler.getAuthenticatedUser() != null) {
+            int userId = handler.getAuthenticatedUser().getUserId();
+            activeClientsById.computeIfAbsent(userId, k -> new ArrayList<>()).add(handler);
+            log.info("Cliente autenticado y registrado: UserID={}, IP={}", userId, handler.getClientIpAddress());
+        }
     }
+
 
     public Set<Integer> getConnectedUserIds() {
         return new HashSet<>(activeClientsById.keySet());

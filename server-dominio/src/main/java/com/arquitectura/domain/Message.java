@@ -14,11 +14,11 @@ public abstract class Message {
     @Column(name = "id_mensaje")
     private Long idMensaje;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "channel_id", nullable = false)
     private Channel channel; // <-- ¡CAMBIO IMPORTANTE!
 

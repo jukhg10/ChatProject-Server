@@ -11,7 +11,7 @@ public class TranscripcionAudio {
     @Column(name = "id_mensaje")
     private Long id; // Debe ser del mismo tipo que el ID del mensaje
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE}) // Le decimos que no haga nada en cascada
+    @OneToOne(fetch = FetchType.EAGER)
     @MapsId
     @JoinColumn(name = "id_mensaje")
     private Message mensaje;
@@ -32,6 +32,8 @@ public class TranscripcionAudio {
             this.id = mensaje.getIdMensaje(); // <-- ¡ESTA ES LA LÍNEA CLAVE!
         }
     }
+
+
 
     public Long getId() {
         return id;
