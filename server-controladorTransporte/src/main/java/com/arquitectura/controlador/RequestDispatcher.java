@@ -19,12 +19,13 @@ import java.util.List;
 public class RequestDispatcher {
 
     private final IChatFachada chatFachada;
-    private Gson gson =new Gson() ;
+    private final Gson gson;
     private UserResponseDto authenticatedUser = null;
 
     @Autowired
-    public RequestDispatcher(IChatFachada chatFachada) {
+    public RequestDispatcher(IChatFachada chatFachada, Gson gson) {
         this.chatFachada = chatFachada;
+        this.gson = gson;
     }
 
     public void dispatch(String request, IClientHandler handler) {

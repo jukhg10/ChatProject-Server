@@ -33,7 +33,7 @@ public class ServerListener {
     @Value("${server.max.connections}")
     private int maxConnectedUsers;
 
-    private final Gson gson = new Gson();
+    private final Gson gson;
     private ExecutorService clientPool;
     private final RequestDispatcher requestDispatcher;
 
@@ -41,7 +41,8 @@ public class ServerListener {
     private final Map<Integer, List<IClientHandler>> activeClientsById = Collections.synchronizedMap(new HashMap<>());
 
     @Autowired
-    public ServerListener(RequestDispatcher requestDispatcher) {
+    public ServerListener(Gson gson, RequestDispatcher requestDispatcher) {
+        this.gson = gson;
         this.requestDispatcher = requestDispatcher;
     }
 
