@@ -72,4 +72,15 @@ public class FileStorageService implements  IFileStorageService{
         // Codifica los bytes en una cadena Base64 y la devuelve
         return Base64.getEncoder().encodeToString(fileBytes);
     }
+
+    @Override
+    public String storeFile(byte[] fileData, String newFileName, String subDirectory) throws IOException {
+        Path uploadPath = Paths.get("uploads", subDirectory).toAbsolutePath().normalize();
+        Files.createDirectories(uploadPath);
+
+        Path targetLocation = uploadPath.resolve(newFileName);
+        Files.write(targetLocation, fileData); // Usamos Files.write para guardar los bytes
+
+        return targetLocation.toString();
+    }
 }

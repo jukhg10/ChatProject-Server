@@ -2,7 +2,10 @@ package com.arquitectura.logicaMensajes;
 
 import com.arquitectura.DTO.Mensajes.MessageResponseDto;
 import com.arquitectura.DTO.Mensajes.SendMessageRequestDto; // <-- IMPORT AÑADIDO
+import com.arquitectura.DTO.Mensajes.TranscriptionResponseDto;
 import com.arquitectura.domain.Message;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 public interface IMessageService {
@@ -32,4 +35,6 @@ public interface IMessageService {
      */
     List<MessageResponseDto> obtenerMensajesPorCanal(int canalId,int UserId) throws Exception;
     void enviarMensajeBroadcast(String contenido, int adminId) throws Exception;
+
+    List<TranscriptionResponseDto> getAllTranscriptions();
 }

@@ -4,6 +4,7 @@ import com.arquitectura.DTO.Mensajes.MessageResponseDto;
 import com.arquitectura.controlador.IClientHandler;
 import com.arquitectura.controlador.RequestDispatcher;
 import com.arquitectura.events.*;
+import com.arquitectura.utils.file.IFileStorageService;
 import com.google.gson.Gson;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -36,14 +37,16 @@ public class ServerListener {
     private final Gson gson;
     private ExecutorService clientPool;
     private final RequestDispatcher requestDispatcher;
+    private final IFileStorageService fileStorageService;
 
     // El mapa de sesiones activas vuelve a ser responsabilidad de esta clase.
     private final Map<Integer, List<IClientHandler>> activeClientsById = Collections.synchronizedMap(new HashMap<>());
 
     @Autowired
-    public ServerListener(Gson gson, RequestDispatcher requestDispatcher) {
+    public ServerListener(Gson gson, RequestDispatcher requestDispatcher, IFileStorageService fileStorageService) {
         this.gson = gson;
         this.requestDispatcher = requestDispatcher;
+        this.fileStorageService = fileStorageService;
     }
 
     @PostConstruct
@@ -89,10 +92,30 @@ public class ServerListener {
 
     @EventListener
     public void handleNewMessageEvent(NewMessageEvent event) {
-        MessageResponseDto messageDto = event.getMessageDto();
-        log.info("Nuevo mensaje en canal {}. Propagando a los miembros conectados.", messageDto.getChannelId());
+        MessageResponseDto originalDto = event.getMessageDto();
+        log.info("Nuevo mensaje en canal {}. Propagando a los miembros conectados.", originalDto.getChannelId());
         List<Integer> memberIds = event.getRecipientUserIds();
-        String notification = "EVENTO;NUEVO_MENSAJE;" + gson.toJson(messageDto);
+        MessageResponseDto dtoParaPropagar = originalDto;
+        if ("AUDIO".equals(originalDto.getMessageType())) {
+            try {
+                String base64Content = fileStorageService.readFileAsBase64(originalDto.getContent());
+                dtoParaPropagar = new MessageResponseDto(
+                        originalDto.getMessageId(),
+                        originalDto.getChannelId(),
+                        originalDto.getAuthor(),
+                        originalDto.getTimestamp(),
+                        originalDto.getMessageType(),
+                        base64Content // <-- ¡Aquí va el contenido Base64!
+                );
+                log.info("Mensaje de audio ID {} codificado a Base64 para su propagación.", originalDto.getMessageId());
+
+            } catch (Exception e) {
+                log.error("Error al leer y codificar el archivo de audio para propagación: {}", e.getMessage());
+                return;
+            }
+        }
+
+        String notification = "EVENTO;NUEVO_MENSAJE;" + gson.toJson(dtoParaPropagar);
 
         memberIds.forEach(memberId -> {
             List<IClientHandler> userSessions = activeClientsById.get(memberId);

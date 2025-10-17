@@ -151,9 +151,11 @@ public class ChannelServiceImpl implements IChannelService {
     @Override
     @Transactional(readOnly = true)
     public List<ChannelResponseDto> getPendingInvitationsForUser(int userId) {
-        // Este método requerirá añadir uno nuevo al repositorio
-        return membresiaCanalRepository.findAllByUsuarioUserIdAndEstado(userId, EstadoMembresia.PENDIENTE)
-                .stream()
+        // 1. Llamamos al nuevo método que trae toda la información de una vez.
+        List<MembresiaCanal> invitaciones = membresiaCanalRepository.findPendingMembresiasByUserIdWithDetails(userId, EstadoMembresia.PENDIENTE);
+
+        // 2. La conversión a DTO ahora es 100% segura y no causará errores.
+        return invitaciones.stream()
                 .map(MembresiaCanal::getCanal)
                 .map(this::mapToChannelResponseDto)
                 .collect(Collectors.toList());
@@ -161,31 +163,32 @@ public class ChannelServiceImpl implements IChannelService {
 
 
     @Override
-    @Transactional(readOnly = true) // La transacción empieza aquí
+    @Transactional(readOnly = true)
     public Map<ChannelResponseDto, List<UserResponseDto>> obtenerCanalesConMiembros() {
-        // 1. Pedimos a la base de datos las entidades con toda la información.
+        // 1. La consulta ahora trae TODOS los datos necesarios de una sola vez.
         List<Channel> canales = channelRepository.findAllWithMembresiasAndUsuarios();
 
-        // 2. Convertimos la lista de Entidades a un Mapa de DTOs.
-        //    Como todavía estamos DENTRO del método @Transactional, la sesión
-        //    sigue abierta y podemos acceder a 'canal.getMembresias()' sin error.
+        // 2. La conversión a DTOs ahora es segura y no necesita bucles intermedios.
         return canales.stream()
                 .collect(Collectors.toMap(
-                        this::mapToChannelResponseDto, // Convierte Channel a ChannelResponseDto
+                        this::mapToChannelResponseDto, // Esto ya no fallará
                         canal -> canal.getMembresias().stream()
                                 .filter(membresia -> membresia.getEstado() == EstadoMembresia.ACTIVO)
-                                .map(membresia -> mapToUserResponseDto(membresia.getUsuario())) // Convierte User a UserResponseDto
+                                .map(membresia -> mapToUserResponseDto(membresia.getUsuario())) // Esto tampoco fallará
                                 .collect(Collectors.toList())
                 ));
     }
     @Override
     @Transactional(readOnly = true)
     public List<ChannelResponseDto> obtenerCanalesPorUsuario(int userId) {
-        // Necesitaremos un nuevo método en el MembresiaCanalRepository
-        return membresiaCanalRepository.findAllByUsuarioUserIdAndEstado(userId, EstadoMembresia.ACTIVO)
-                .stream()
-                .map(MembresiaCanal::getCanal) // De cada membresía, obtenemos el canal
-                .map(this::mapToChannelResponseDto) // Convertimos la entidad a DTO
+        // 1. Llamamos al nuevo método que nos trae toda la información de una vez.
+        List<MembresiaCanal> membresias = membresiaCanalRepository.findActiveMembresiasByUserIdWithDetails(userId, EstadoMembresia.ACTIVO);
+
+        // 2. La conversión es ahora 100% segura. Ya no se necesita forzar la carga
+        //    con "owner.getUsername()" porque los datos ya vienen completos desde la BD.
+        return membresias.stream()
+                .map(MembresiaCanal::getCanal)      // De cada membresía, obtenemos el canal
+                .map(this::mapToChannelResponseDto) // Convertimos la entidad a DTO (¡Sin errores!)
                 .collect(Collectors.toList());
     }
 

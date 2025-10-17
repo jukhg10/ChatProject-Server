@@ -21,6 +21,6 @@ public interface ChannelRepository extends JpaRepository<Channel, Integer> {
                                                     @Param("user1Id") int user1Id,
                                                     @Param("user2Id") int user2Id);
 
-    @Query("SELECT DISTINCT c FROM Channel c LEFT JOIN FETCH c.membresias m LEFT JOIN FETCH m.usuario")
+    @Query("SELECT DISTINCT c FROM Channel c LEFT JOIN FETCH c.owner o LEFT JOIN FETCH c.membresias m LEFT JOIN FETCH m.usuario u")
     List<Channel> findAllWithMembresiasAndUsuarios();
 }
