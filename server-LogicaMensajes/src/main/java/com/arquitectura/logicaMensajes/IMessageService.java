@@ -30,6 +30,6 @@ public interface IMessageService {
      * @param canalId El ID del canal.
      * @return Una lista con los mensajes del canal.
      */
-    List<MessageResponseDto> obtenerMensajesPorCanal(int canalId);
+    List<MessageResponseDto> obtenerMensajesPorCanal(int canalId,int UserId) throws Exception;
     void enviarMensajeBroadcast(String contenido, int adminId) throws Exception;
 }

@@ -10,6 +10,7 @@ import com.arquitectura.DTO.canales.RespondToInviteRequestDto;
 import com.arquitectura.DTO.usuarios.LoginRequestDto;
 import com.arquitectura.DTO.usuarios.UserRegistrationRequestDto;
 import com.arquitectura.DTO.usuarios.UserResponseDto;
+import com.arquitectura.events.ConnectedUsersRequestEvent;
 import com.arquitectura.logicaCanales.IChannelService;
 import com.arquitectura.logicaMensajes.IMessageService;
 import com.arquitectura.logicaMensajes.transcripcionAudio.IAudioTranscriptionService;
@@ -18,13 +19,11 @@ import com.arquitectura.utils.file.IFileStorageService;
 import com.arquitectura.utils.logs.ILogService;
 import com.arquitectura.utils.logs.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class ChatFachadaImpl implements IChatFachada {
@@ -34,16 +33,18 @@ public class ChatFachadaImpl implements IChatFachada {
     private final IMessageService messageService;
     private final IAudioTranscriptionService transcriptionService;
     private final IFileStorageService fileStorageService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final ILogService logService ;
 
     @Autowired
-    public ChatFachadaImpl(IUserService userService, IChannelService channelService, IMessageService messageService, IAudioTranscriptionService transcriptionService, IFileStorageService fileStorageService, ILogService logService) {
+    public ChatFachadaImpl(IUserService userService, IChannelService channelService, IMessageService messageService, IAudioTranscriptionService transcriptionService, IFileStorageService fileStorageService, ApplicationEventPublisher eventPublisher, ILogService logService) {
         this.userService = userService;
         this.channelService = channelService;
         this.messageService = messageService;
         this.transcriptionService = transcriptionService;
         this.fileStorageService = fileStorageService;
+        this.eventPublisher = eventPublisher;
         this.logService = logService;
     }
 
@@ -70,6 +71,17 @@ public class ChatFachadaImpl implements IChatFachada {
     @Override
     public List<UserResponseDto> getUsersByIds(Set<Integer> userIds) {
         return userService.getUsersByIds(userIds);
+    }
+
+    @Override
+    public List<UserResponseDto> obtenerUsuariosConectados() {
+        ConnectedUsersRequestEvent requestEvent = new ConnectedUsersRequestEvent(this);
+        eventPublisher.publishEvent(requestEvent);
+        Set<Integer> connectedUserIds = requestEvent.getResponseContainer();
+        if (connectedUserIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return userService.getUsersByIds(connectedUserIds);
     }
 
     // --- MÉTODOS DE Canales ---
@@ -126,8 +138,8 @@ public class ChatFachadaImpl implements IChatFachada {
     }
 
     @Override
-    public List<MessageResponseDto> obtenerMensajesDeCanal(int canalId) {
-        return messageService.obtenerMensajesPorCanal(canalId);
+    public List<MessageResponseDto> obtenerMensajesDeCanal(int canalId, int userId) throws Exception {
+        return messageService.obtenerMensajesPorCanal(canalId,userId);
     }
 
     @Override

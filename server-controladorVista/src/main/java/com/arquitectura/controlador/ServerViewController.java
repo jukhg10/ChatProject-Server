@@ -64,6 +64,9 @@ public class ServerViewController {
     public void disconnectUser(int userId) {
         eventPublisher.publishEvent(new ForceDisconnectEvent(this, userId));
     }
+    public List<UserResponseDto> obtenerUsuariosConectados() {
+        return chatFachada.obtenerUsuariosConectados();
+    }
 
 
 

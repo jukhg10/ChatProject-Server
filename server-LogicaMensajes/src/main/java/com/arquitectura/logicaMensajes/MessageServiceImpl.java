@@ -106,9 +106,18 @@ public class MessageServiceImpl implements IMessageService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MessageResponseDto> obtenerMensajesPorCanal(int canalId) {
+    public List<MessageResponseDto> obtenerMensajesPorCanal(int canalId, int userId) throws Exception {
+        MembresiaCanalId membresiaId = new MembresiaCanalId(canalId, userId);
+        MembresiaCanal membresia = membresiaCanalRepository.findById(membresiaId)
+                .orElseThrow(() -> new Exception("Acceso denegado. No eres miembro de este canal."));
+        // 3. Verificamos que su membresía esté activa.
+        if (membresia.getEstado() != EstadoMembresia.ACTIVO) {
+            throw new Exception("Acceso denegado. Tu membresía en este canal no está activa.");
+        }
+        // --- FIN DE LA LÓGICA DE SEGURIDAD ---
+        // 4. Si la validación pasa, devolvemos el historial como antes.
         return messageRepository.findByChannelChannelId(canalId).stream()
-                .map(this::mapToMessageResponseDto) // Mapea cada mensaje a su DTO
+                .map(this::mapToMessageResponseDto)
                 .collect(Collectors.toList());
     }
 

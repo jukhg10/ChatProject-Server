@@ -3,10 +3,7 @@ package com.arquitectura.transporte;
 import com.arquitectura.DTO.Mensajes.MessageResponseDto;
 import com.arquitectura.controlador.IClientHandler;
 import com.arquitectura.controlador.RequestDispatcher;
-import com.arquitectura.events.BroadcastMessageEvent;
-import com.arquitectura.events.ForceDisconnectEvent;
-import com.arquitectura.events.NewMessageEvent;
-import com.arquitectura.events.UserInvitedEvent;
+import com.arquitectura.events.*;
 import com.google.gson.Gson;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -115,6 +112,11 @@ public class ServerListener {
             userSessions.forEach(handler -> handler.sendMessage(notification));
             log.info("Notificación de invitación enviada al usuario {}.", invitedUserId);
         }
+    }
+    @EventListener
+    public void handleConnectedUsersRequest(ConnectedUsersRequestEvent event) {
+        // Obtenemos la "canasta" vacía del evento y la llenamos con nuestros datos.
+        event.getResponseContainer().addAll(this.activeClientsById.keySet());
     }
 
     // --- MÉTODOS PÚBLICOS PARA GESTIÓN DE SESIONES ---

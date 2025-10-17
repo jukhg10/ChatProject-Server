@@ -26,6 +26,7 @@ public interface IChatFachada {
     List<UserResponseDto> obtenerTodosLosUsuarios();
     UserResponseDto autenticarUsuario(LoginRequestDto requestDto, String ipAddress) throws Exception;
     List<UserResponseDto> getUsersByIds(Set<Integer> userIds);
+    List<UserResponseDto> obtenerUsuariosConectados();
 
     // --- Métodos de Canal ---
     ChannelResponseDto crearCanal(CreateChannelRequestDto requestDto, int ownerId) throws Exception;
@@ -43,7 +44,7 @@ public interface IChatFachada {
     void enviarMensajeBroadcast(String contenido, int adminId) throws Exception;
     MessageResponseDto enviarMensajeTexto(SendMessageRequestDto requestDto, int autorId) throws Exception;
     MessageResponseDto enviarMensajeAudio(SendMessageRequestDto requestDto, int autorId) throws Exception;
-    List<MessageResponseDto> obtenerMensajesDeCanal(int canalId);
+    List<MessageResponseDto> obtenerMensajesDeCanal(int canalId, int userId) throws Exception;
     List<TranscriptionResponseDto> obtenerTranscripciones();
 
     //Metodos de Utils
@@ -51,4 +52,5 @@ public interface IChatFachada {
 
     // --- MÉTODOS PARA INFORMES ---
     String getLogContents() throws IOException;
+
 }

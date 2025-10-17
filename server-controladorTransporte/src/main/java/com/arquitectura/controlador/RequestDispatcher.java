@@ -1,5 +1,6 @@
 package com.arquitectura.controlador;
 
+import com.arquitectura.DTO.Mensajes.MessageResponseDto;
 import com.arquitectura.DTO.Mensajes.SendMessageRequestDto;
 import com.arquitectura.DTO.canales.ChannelResponseDto;
 import com.arquitectura.DTO.canales.CreateChannelRequestDto;
@@ -184,6 +185,26 @@ public class RequestDispatcher {
                         chatFachada.enviarMensajeAudio(messageDto, autorId);
 
                         handler.sendMessage("OK;ENVIAR_MENSAJE_AUDIO;Mensaje de audio recibido.");
+                    }
+                    break;
+                case "GET_HISTORY":
+                    if (parts.length == 2) {
+                        int channelId = Integer.parseInt(parts[1]);
+
+                        // Obtenemos el ID del usuario autenticado para la validación de seguridad.
+                        int userIdHistory = handler.getAuthenticatedUser().getUserId();
+
+                        // Llamamos a la fachada con ambos IDs.
+                        List<MessageResponseDto> history = chatFachada.obtenerMensajesDeCanal(channelId, userIdHistory);
+
+                        // Convertimos el resultado a JSON.
+                        String jsonHistory = gson.toJson(history);
+
+                        // Enviamos la respuesta al cliente.
+                        handler.sendMessage("OK;GET_HISTORY;" + channelId + ";" + jsonHistory);
+                    } else {
+                        // El mensaje de error solicitado.
+                        handler.sendMessage("ERROR;GET_HISTORY;Formato incorrecto. Se esperaba: GET_HISTORY;id_canal");
                     }
                     break;
 

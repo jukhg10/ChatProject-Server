@@ -163,17 +163,16 @@ public class ChannelServiceImpl implements IChannelService {
     @Override
     @Transactional(readOnly = true)
     public Map<ChannelResponseDto, List<UserResponseDto>> obtenerCanalesConMiembros() {
-        List<Channel> canales = channelRepository.findAll();
+        // Usamos el nuevo método del repositorio que carga todo de una vez.
+        List<Channel> canales = channelRepository.findAllWithMembresiasAndUsuarios();
 
         return canales.stream()
                 .collect(Collectors.toMap(
-                        this::mapToChannelResponseDto, // La clave del mapa es el DTO del canal
+                        this::mapToChannelResponseDto,
                         canal -> canal.getMembresias().stream()
-                                // Filtramos solo los miembros que están activos en el canal
                                 .filter(membresia -> membresia.getEstado() == EstadoMembresia.ACTIVO)
-                                // Mapeamos la entidad User a su DTO
                                 .map(membresia -> mapToUserResponseDto(membresia.getUsuario()))
-                                .collect(Collectors.toList()) // El valor del mapa es la lista de DTOs de usuario
+                                .collect(Collectors.toList())
                 ));
     }
     @Override

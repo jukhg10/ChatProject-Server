@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,4 +20,7 @@ public interface ChannelRepository extends JpaRepository<Channel, Integer> {
     Optional<Channel> findDirectChannelBetweenUsers(@Param("tipo") TipoCanal tipo,
                                                     @Param("user1Id") int user1Id,
                                                     @Param("user2Id") int user2Id);
+
+    @Query("SELECT DISTINCT c FROM Channel c LEFT JOIN FETCH c.membresias m LEFT JOIN FETCH m.usuario")
+    List<Channel> findAllWithMembresiasAndUsuarios();
 }
